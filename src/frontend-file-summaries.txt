@@ -1,0 +1,15 @@
+{
+  "frontend/src/App.tsx": "Main app component with TanStack Router setup, authentication flow in RootComponent, and profile check that routes users to login, profile setup, or dashboard based on their state.",
+  "frontend/src/pages/LoginPage.tsx": "Login page with playful poop emoji branding and Internet Identity authentication button.",
+  "frontend/src/pages/ProfileSetup.tsx": "Profile creation page where users customize their display name, emoji, color, and background gradient with live preview.",
+  "frontend/src/pages/Dashboard.tsx": "Main dashboard with welcome section, quick log button, lifetime leaderboard component, all-time standings table, and info card explaining app features.",
+  "frontend/src/pages/LogPoop.tsx": "Three-step poop logging flow (confirm → enter wipes → success) with large, playful UI and form validation.",
+  "frontend/src/components/Layout.tsx": "App layout wrapper with header (logo, navigation, logout), main content area, and footer with caffeine.ai attribution.",
+  "frontend/src/components/ProfilePreview.tsx": "Reusable component displaying user profile with emoji, custom background gradient, and colored border in multiple sizes.",
+  "frontend/src/constants/profileOptions.ts": "Preset options for profile customization including 40 emojis, 20 colors, and 12 gradient backgrounds.",
+  "frontend/src/index.css": "Global styles with warm amber/orange OKLCH color palette for playful poop tracker theme in light and dark modes.",
+  "frontend/tailwind.config.js": "Tailwind configuration with extended color system, custom border radius, and Inter font family.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for fetching user profile, registering profiles, creating poop entries, and fetching ranked user statistics with automatic cache invalidation.",
+  "frontend/src/components/Leaderboard.tsx": "Displays King Pooper and King Wiper leaders with profile previews, badges, total stats, and MVP recognition when one user holds both titles.",
+  "frontend/src/components/AllTimeStandings.tsx": "Comprehensive rankings table showing all users sorted by poops and wipes with ProfilePreview, total stats, calculated TP rolls (3 sheets/wipe, 200 sheets/roll), and average wipes per poop with leader badges."
+}

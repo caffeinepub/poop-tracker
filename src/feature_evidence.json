@@ -1,0 +1,80 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-remove-the-existing-leaderboard-placeholder-component-and-replace-it-with-a-fully-functional-lifetime-leaderboard-that-displays-king-pooper-user-with-most-total-poops-king-wiper-user-with-most-total-wipes-and-mvp-most-valuable-pooper-badge-for-any-user-who-holds-both-titles-simultaneously",
+      "featureTitle": "Remove the existing leaderboard placeholder component and replace it with a fully functional lifetime leaderboard that displays King Pooper (user with most total poops), King Wiper (user with most total wipes), and MVP: Most Valuable Pooper badge for any user who holds both titles simultaneously",
+      "files": [
+        "frontend/src/components/Leaderboard.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/Dashboard.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-calculate-and-display-toilet-paper-roll-consumption-for-each-user-based-on-lifetime-wipes-using-the-formula-total-wipes-sheets-per-wipe-sheets-per-roll-showing-the-result-as-a-fun-statistic-on-the-leaderboard",
+      "featureTitle": "Calculate and display toilet paper roll consumption for each user based on lifetime wipes using the formula: (total wipes × sheets per wipe) ÷ sheets per roll, showing the result as a fun statistic on the leaderboard",
+      "files": [
+        "frontend/src/components/AllTimeStandings.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-calculate-and-display-average-wipes-per-poop-for-each-user-using-the-formula-total-wipes-total-poops-showing-this-efficiency-metric-in-the-leaderboard-standings-table",
+      "featureTitle": "Calculate and display average wipes per poop for each user using the formula: total wipes ÷ total poops, showing this efficiency metric in the leaderboard standings table",
+      "files": [
+        "frontend/src/components/AllTimeStandings.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-11"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-an-all-time-standings-table-that-displays-all-users-ranked-primarily-by-total-poops-and-secondarily-by-total-wipes-showing-columns-for-display-name-emoji-total-poops-total-wipes-toilet-paper-rolls-used-and-average-wipes-per-poop-for-each-person",
+      "featureTitle": "Create an all-time standings table that displays all users ranked primarily by total poops and secondarily by total wipes, showing columns for display name/emoji, total poops, total wipes, toilet paper rolls used, and average wipes per poop for each person",
+      "files": [
+        "frontend/src/components/AllTimeStandings.tsx",
+        "frontend/src/pages/Dashboard.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-12"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

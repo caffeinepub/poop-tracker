@@ -1,0 +1,133 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 5,
+  "summary": "Poop tracker app - A playful group tracker where friends log poops and wipes with leaderboards and daily progress views",
+  "architectural_notes": [
+    "Use Internet Identity for simple passkey-based authentication",
+    "Store poop entries with automatic timestamp (date and time)",
+    "Calculate TP rolls from wipes using sheets-per-wipe and sheets-per-roll constants",
+    "Profile linked to each logged entry to ensure proper data attribution"
+  ],
+  "known_issues": [],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-implement-internet-identity-authentication-so-users-can-securely-log-in-and-have-their-poop-and-wipe-entries-tracked-to-their-individual-profiles",
+      "title": "Implement Internet Identity authentication so users can securely log in and have their poop and wipe entries tracked to their individual profiles",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-user-profiles-where-each-user-can-set-a-custom-display-name-choose-from-preset-emojis-icons-and-select-colors-and-backgrounds-for-their-profile-appearance",
+      "title": "Create user profiles where each user can set a custom display name, choose from preset emojis/icons, and select colors and backgrounds for their profile appearance",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-simple-data-entry-flow-where-logged-in-users-tap-to-log-a-poop-enter-the-number-of-wipes-and-the-entry-is-automatically-timestamped-with-the-current-date-and-time",
+      "title": "Build a simple data entry flow where logged-in users tap to log a poop, enter the number of wipes, and the entry is automatically timestamped with the current date and time",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-lifetime-leaderboard-that-displays-rankings-for-most-poops-king-pooper-most-wipes-king-wiper-and-awards-a-special-mvp-most-valuable-pooper-badge-to-anyone-who-holds-both-titles",
+      "title": "Create a lifetime leaderboard that displays rankings for most poops (King Pooper), most wipes (King Wiper), and awards a special MVP: Most Valuable Pooper badge to anyone who holds both titles",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-daily-view-that-shows-everyone-s-progress-for-the-current-day-with-a-toggle-to-switch-between-group-view-all-users-and-individual-view-single-user-s-stats",
+      "title": "Build a daily view that shows everyone's progress for the current day, with a toggle to switch between group view (all users) and individual view (single user's stats)",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-design-a-playful-and-humorous-visual-theme-for-the-app-with-fun-colors-typography-and-layout-that-matches-the-lighthearted-nature-of-tracking-poops-and-wipes-among-friends-ensuring-the-ui-feels-joking-but-still-functional-and-easy-to-use",
+      "title": "Design a playful and humorous visual theme for the app with fun colors, typography, and layout that matches the lighthearted nature of tracking poops and wipes among friends, ensuring the UI feels joking but still functional and easy to use",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-existing-leaderboard-placeholder-component-and-replace-it-with-a-fully-functional-lifetime-leaderboard-that-displays-king-pooper-user-with-most-total-poops-king-wiper-user-with-most-total-wipes-and-mvp-most-valuable-pooper-badge-for-any-user-who-holds-both-titles-simultaneously",
+      "title": "Remove the existing leaderboard placeholder component and replace it with a fully functional lifetime leaderboard that displays King Pooper (user with most total poops), King Wiper (user with most total wipes), and MVP: Most Valuable Pooper badge for any user who holds both titles simultaneously",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-calculate-and-display-toilet-paper-roll-consumption-for-each-user-based-on-lifetime-wipes-using-the-formula-total-wipes-sheets-per-wipe-sheets-per-roll-showing-the-result-as-a-fun-statistic-on-the-leaderboard",
+      "title": "Calculate and display toilet paper roll consumption for each user based on lifetime wipes using the formula: (total wipes × sheets per wipe) ÷ sheets per roll, showing the result as a fun statistic on the leaderboard",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-calculate-and-display-average-wipes-per-poop-for-each-user-using-the-formula-total-wipes-total-poops-showing-this-efficiency-metric-in-the-leaderboard-standings-table",
+      "title": "Calculate and display average wipes per poop for each user using the formula: total wipes ÷ total poops, showing this efficiency metric in the leaderboard standings table",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-an-all-time-standings-table-that-displays-all-users-ranked-primarily-by-total-poops-and-secondarily-by-total-wipes-showing-columns-for-display-name-emoji-total-poops-total-wipes-toilet-paper-rolls-used-and-average-wipes-per-poop-for-each-person",
+      "title": "Create an all-time standings table that displays all users ranked primarily by total poops and secondarily by total wipes, showing columns for display name/emoji, total poops, total wipes, toilet paper rolls used, and average wipes per poop for each person",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "User authentication with Internet Identity for profile tracking",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "User profiles with customizable name, emoji/icon, colors, and backgrounds (no custom images)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Simple data entry flow: log poop → enter wipes → auto-timestamp → done",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Daily view showing everyone's progress with toggle between group and individual views",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Add backend query function to aggregate and return all users' lifetime statistics including total poop count, total wipe count, and profile information needed for leaderboard rankings and standings table",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Poop Tracker",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

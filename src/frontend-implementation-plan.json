@@ -1,0 +1,90 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Replace leaderboard with complete lifetime stats implementation",
+  "requirements": [
+    {
+      "id": "REQ-9",
+      "summary": "Remove existing leaderboard placeholder and implement fully functional lifetime leaderboard with King Pooper, King Wiper titles and MVP badge",
+      "acceptanceCriteria": [
+        "Leaderboard fetches all users' poop and wipe totals from backend",
+        "King Pooper title and crown badge displayed for user with highest total poops",
+        "King Wiper title and toilet paper badge displayed for user with highest total wipes",
+        "MVP badge displayed only when a single user holds both King Pooper and King Wiper titles",
+        "Rankings update in real-time when new poop entries are logged"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Remove the placeholder leaderboard card and replace it with the new Leaderboard component that displays King Pooper and King Wiper leaders with badges and MVP recognition"
+        },
+        {
+          "path": "frontend/src/components/Leaderboard.tsx",
+          "operation": "create",
+          "description": "Create Leaderboard component that fetches ranked user stats from backend using getRankedUserStats, identifies King Pooper (highest totalPoops) and King Wiper (highest totalWipes), displays both leaders with ProfilePreview and appropriate badges (crown for King Pooper, toilet paper for King Wiper), and shows MVP badge when one user holds both titles. Use React Query for data fetching with real-time refetch integration."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add useRankedUserStats React Query hook that calls backend getRankedUserStats method and returns the array of UserStats with proper TypeScript typing and error handling"
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Calculate and display toilet paper roll consumption for each user based on lifetime wipes",
+      "acceptanceCriteria": [
+        "Calculation uses reasonable defaults (e.g., 3 sheets per wipe, 200 sheets per roll)",
+        "Result displayed with decimal precision (e.g., '12.5 rolls')",
+        "Statistic shows next to each user in the leaderboard table"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AllTimeStandings.tsx",
+          "operation": "create",
+          "description": "Create AllTimeStandings component that displays full user rankings table with columns for ProfilePreview, total poops, total wipes, toilet paper rolls used (calculated using totalWipes * 3 / 200 formula with decimal precision), and average wipes per poop. Include crown and toilet paper badges for King Pooper and King Wiper in their respective rows."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Calculate and display average wipes per poop efficiency metric for each user",
+      "acceptanceCriteria": [
+        "Calculation handles division by zero gracefully (show 0 or '--' when no poops logged)",
+        "Result displayed with one decimal place (e.g., '4.2 wipes/poop')",
+        "Metric appears as a column in the all-time standings table"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AllTimeStandings.tsx",
+          "operation": "modify",
+          "description": "Add average wipes per poop column to the standings table using totalWipes / totalPoops calculation with one decimal place formatting, gracefully handling division by zero with '--' or '0.0' display when totalPoops is 0"
+        }
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "summary": "Create all-time standings table displaying all users ranked by total poops and wipes with comprehensive statistics",
+      "acceptanceCriteria": [
+        "Backend provides endpoint to fetch all users with their aggregated stats",
+        "Table sorts users by total poops descending, with wipes as tiebreaker",
+        "Each row shows ProfilePreview component, total poops, total wipes, TP rolls calculation, and average wipes/poop",
+        "Table is responsive and maintains playful visual theme",
+        "Crown/toilet paper badges appear next to leaders in the table"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Add AllTimeStandings component below the Leaderboard component in the dashboard layout to display the comprehensive rankings table"
+        },
+        {
+          "path": "frontend/src/components/AllTimeStandings.tsx",
+          "operation": "modify",
+          "description": "Ensure table fetches data using useRankedUserStats hook (which returns backend-sorted data), displays all users in order with ProfilePreview components, total poops, total wipes, calculated TP rolls, and average wipes/poop columns. Style table responsively with warm amber/orange theme using Tailwind classes and display crown/toilet paper badges inline with King Pooper and King Wiper rows."
+        }
+      ]
+    }
+  ]
+}

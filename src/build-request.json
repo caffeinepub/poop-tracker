@@ -1,0 +1,128 @@
+{
+  "kind": "build_request",
+  "title": "Replace leaderboard with complete lifetime stats implementation",
+  "projectName": "Poop Tracker",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-9",
+      "text": "Remove the existing leaderboard placeholder component and replace it with a fully functional lifetime leaderboard that displays King Pooper (user with most total poops), King Wiper (user with most total wipes), and MVP: Most Valuable Pooper badge for any user who holds both titles simultaneously",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-15",
+          "msg-17"
+        ],
+        "quotes": [
+          "replace it entirely",
+          "King Pooper & King Wiper rankings with badges",
+          "MVP badge for holding both titles"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Leaderboard fetches all users' poop and wipe totals from backend",
+        "King Pooper title and crown badge displayed for user with highest total poops",
+        "King Wiper title and toilet paper badge displayed for user with highest total wipes",
+        "MVP badge displayed only when a single user holds both King Pooper and King Wiper titles",
+        "Rankings update in real-time when new poop entries are logged"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Calculate and display toilet paper roll consumption for each user based on lifetime wipes using the formula: (total wipes × sheets per wipe) ÷ sheets per roll, showing the result as a fun statistic on the leaderboard",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-15",
+          "msg-17"
+        ],
+        "quotes": [
+          "Toilet paper roll calculator",
+          "Estimates total rolls used based on lifetime wipes"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Calculation uses reasonable defaults (e.g., 3 sheets per wipe, 200 sheets per roll)",
+        "Result displayed with decimal precision (e.g., '12.5 rolls')",
+        "Statistic shows next to each user in the leaderboard table"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "Calculate and display average wipes per poop for each user using the formula: total wipes ÷ total poops, showing this efficiency metric in the leaderboard standings table",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-15",
+          "msg-17"
+        ],
+        "quotes": [
+          "Average wipes per poop stat",
+          "Shows efficiency metric for each user"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Calculation handles division by zero gracefully (show 0 or '--' when no poops logged)",
+        "Result displayed with one decimal place (e.g., '4.2 wipes/poop')",
+        "Metric appears as a column in the all-time standings table"
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "text": "Create an all-time standings table that displays all users ranked primarily by total poops and secondarily by total wipes, showing columns for display name/emoji, total poops, total wipes, toilet paper rolls used, and average wipes per poop for each person",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-15",
+          "msg-17"
+        ],
+        "quotes": [
+          "All-time standings table",
+          "Shows all users ranked by poops (primary) and wipes (secondary)",
+          "Displays total poops, total wipes, TP rolls used, and average wipes/poop for each person"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend provides endpoint to fetch all users with their aggregated stats",
+        "Table sorts users by total poops descending, with wipes as tiebreaker",
+        "Each row shows ProfilePreview component, total poops, total wipes, TP rolls calculation, and average wipes/poop",
+        "Table is responsive and maintains playful visual theme",
+        "Crown/toilet paper badges appear next to leaders in the table"
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "text": "Add backend query function to aggregate and return all users' lifetime statistics including total poop count, total wipe count, and profile information needed for leaderboard rankings and standings table",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-15",
+          "msg-17"
+        ]
+      },
+      "acceptanceCriteria": [
+        "New query function returns array of all registered users with aggregated stats",
+        "Each user record includes displayName, emoji, color, background, total poops, total wipes",
+        "Function is callable by any authenticated user to view public leaderboard",
+        "Performance is acceptable even with many users and entries"
+      ]
+    }
+  ],
+  "constraints": [
+    "Keep existing Internet Identity authentication, user profiles, and poop entry logging features unchanged",
+    "Use the existing ProfilePreview component for displaying user avatars in the leaderboard",
+    "Maintain the playful visual theme with warm amber/orange color palette",
+    "Do not modify immutable frontend paths including useInternetIdentity, useActor, main.tsx, and ui components"
+  ],
+  "nonGoals": [
+    "Daily tracking or daily progress views",
+    "Historical data visualization or charts",
+    "Filtering or search functionality in leaderboard",
+    "Customizable calculation formulas for TP rolls or average wipes",
+    "Exporting or sharing leaderboard data"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}
