@@ -8,9 +8,9 @@ import Iter "mo:core/Iter";
 import Runtime "mo:core/Runtime";
 import Nat64 "mo:core/Nat64";
 import Time "mo:core/Time";
-import Migration "migration";
 
-(with migration = Migration.run)
+
+
 actor {
   type Profile = {
     displayName : Text;

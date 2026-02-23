@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 5,
+  "projectStateVersion": 7,
   "summary": "Poop tracker app - A playful group tracker where friends log poops and wipes with leaderboards and daily progress views",
   "architectural_notes": [
     "Use Internet Identity for simple passkey-based authentication",
@@ -8,7 +8,9 @@
     "Calculate TP rolls from wipes using sheets-per-wipe and sheets-per-roll constants",
     "Profile linked to each logged entry to ensure proper data attribution"
   ],
-  "known_issues": [],
+  "known_issues": [
+    "Emojis not centered in their boxes in mobile view during profile creation"
+  ],
   "isFixRequest": true,
   "existing_features": [
     {
@@ -88,6 +90,14 @@
       "title": "Create an all-time standings table that displays all users ranked primarily by total poops and secondarily by total wipes, showing columns for display name/emoji, total poops, total wipes, toilet paper rolls used, and average wipes per poop for each person",
       "reqIds": [
         "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-emoji-alignment-in-the-profile-creation-page-so-that-emojis-are-properly-centered-within-their-selection-boxes-in-mobile-view",
+      "title": "Fix emoji alignment in the profile creation page so that emojis are properly centered within their selection boxes in mobile view",
+      "reqIds": [
+        "REQ-14"
       ],
       "version": 1
     }

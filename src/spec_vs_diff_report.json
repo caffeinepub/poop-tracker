@@ -1,27 +1,14 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-23T20:25:00.432Z",
-  "summary": "The implementation successfully covers most requirements for the lifetime leaderboard and statistics. All backend and frontend components are present, including the new getRankedUserStats query, Leaderboard component with King Pooper/King Wiper/MVP badges, and AllTimeStandings table with all required metrics. However, there is a calculation error in the TP rolls formula in the backend that deviates from the specification.",
+  "generatedAt": "2026-02-23T20:41:55.274Z",
+  "summary": "The diff implements REQ-14 by adding flexbox centering classes (flex items-center justify-center) to emoji selection buttons in ProfileSetup.tsx, which centers emojis within their boxes on mobile devices. The implementation aligns with the BuildRequest constraints and requirements.",
   "missing_requirements": [],
-  "hallucinated_features": [
-    {
-      "description": "Backend uses incorrect toilet paper roll calculation formula: totalWipes / 10 instead of the specified formula (total wipes × 3 sheets per wipe) ÷ 200 sheets per roll",
-      "reason": "REQ-10 explicitly specifies the formula: (total wipes × sheets per wipe) ÷ sheets per roll with defaults of 3 sheets per wipe and 200 sheets per roll. The backend implementation in main.mo uses totalRolls = totalWipes / 10 which equals (totalWipes × 1) / 10, not (totalWipes × 3) / 200. While 3/200 approximately equals 0.015 and 1/10 = 0.1 are similar orders of magnitude, they produce different results (the backend formula gives approximately 6.67x higher values).",
-      "evidence": [
-        "backend/main.mo"
-      ]
-    }
-  ],
-  "confidence": 0.92,
+  "hallucinated_features": [],
+  "confidence": 0.95,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/AllTimeStandings.tsx",
-    "frontend/src/components/Leaderboard.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/pages/ProfileSetup.tsx",
     "project_state.json"
   ]
 }

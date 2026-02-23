@@ -93,7 +93,7 @@ export default function ProfileSetup() {
                     key={emoji}
                     type="button"
                     onClick={() => setSelectedEmoji(emoji)}
-                    className={`text-3xl p-3 rounded-lg border-2 transition-all hover:scale-110 ${
+                    className={`flex items-center justify-center text-3xl p-3 rounded-lg border-2 transition-all hover:scale-110 ${
                       selectedEmoji === emoji
                         ? 'border-primary bg-primary/10 scale-110'
                         : 'border-border hover:border-primary/50'

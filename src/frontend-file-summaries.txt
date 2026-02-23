@@ -1,7 +1,7 @@
 {
   "frontend/src/App.tsx": "Main app component with TanStack Router setup, authentication flow in RootComponent, and profile check that routes users to login, profile setup, or dashboard based on their state.",
   "frontend/src/pages/LoginPage.tsx": "Login page with playful poop emoji branding and Internet Identity authentication button.",
-  "frontend/src/pages/ProfileSetup.tsx": "Profile creation page where users customize their display name, emoji, color, and background gradient with live preview.",
+  "frontend/src/pages/ProfileSetup.tsx": "Profile creation page where users customize their display name, emoji, color, and background gradient with live preview. Emoji buttons now use flexbox centering (flex items-center justify-center) to ensure emojis are properly centered within their boxes on mobile devices.",
   "frontend/src/pages/Dashboard.tsx": "Main dashboard with welcome section, quick log button, lifetime leaderboard component, all-time standings table, and info card explaining app features.",
   "frontend/src/pages/LogPoop.tsx": "Three-step poop logging flow (confirm → enter wipes → success) with large, playful UI and form validation.",
   "frontend/src/components/Layout.tsx": "App layout wrapper with header (logo, navigation, logout), main content area, and footer with caffeine.ai attribution.",
