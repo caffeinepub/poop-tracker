@@ -1,35 +1,14 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T18:49:11.658Z",
-  "summary": "The diff implements reverts across App.tsx, useQueries.ts, Leaderboard.tsx, and AllTimeStandings.tsx as requested. REQ-28 and REQ-29 appear fully addressed. However, REQ-30 and REQ-31 specifically require the lifetime/daily toggle to remain functional, and the reverted Leaderboard.tsx and AllTimeStandings.tsx shown in the diff appear to be lifetime-only with no toggle wiring present.",
-  "missing_requirements": [
-    {
-      "id": "REQ-30",
-      "requirement": "The lifetime/daily toggle must remain intact in Leaderboard.tsx",
-      "reason": "The reverted Leaderboard.tsx shown in the diff is titled 'Lifetime Leaderboard' with no toggle state, no isLifetime/isDaily prop or state, and no reference to LeaderboardToggle or daily data. The file summary for Leaderboard.tsx also does not mention a toggle. The lifetime/daily toggle does not appear to be present in the reverted component.",
-      "evidence": [
-        "frontend/src/components/Leaderboard.tsx",
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "id": "REQ-31",
-      "requirement": "AllTimeStandings.tsx must still respond to the lifetime/daily toggle",
-      "reason": "The reverted AllTimeStandings.tsx shown in the diff uses useRankedUserStats() only with no toggle state, no daily data hook, and no LeaderboardToggle integration. The file summary also does not mention a toggle for this component. The daily/lifetime toggle does not appear functional in the standings table.",
-      "evidence": [
-        "frontend/src/components/AllTimeStandings.tsx",
-        "frontend-file-summaries.txt"
-      ]
-    }
-  ],
+  "generatedAt": "2026-02-24T19:11:55.476Z",
+  "summary": "The diff modifies App.tsx and useQueries.ts to implement profile detection fixes. REQ-32 and REQ-33 are largely implemented. REQ-34 is partially implemented — the timeout mechanism and 'Loading your profile…' message exist, but there is a subtle gap: the timeout fires during actor/identity initialization phases too (not just profile query), which is acceptable per spec. The main concern is whether the 10-second timeout correctly falls through to ProfileSetup. Reviewing the logic: when timedOut=true, the loading spinner is skipped, and the code proceeds to check hasProfile = isProfileFetched && profile !== null. If the actor never became ready, isProfileFetched will be false and profile will be undefined, so hasProfile=false and ProfileSetup is rendered — this satisfies REQ-34. REQ-33's AC about 'navigates directly to Dashboard' uses an Outlet pattern rather than explicit navigation, which may not route to '/' automatically, but the Dashboard is the index route so this is likely fine. Overall the implementation appears complete.",
+  "missing_requirements": [],
   "hallucinated_features": [],
-  "confidence": 0.7,
+  "confidence": 0.82,
   "changed_files": [
     "frontend-file-summaries.txt",
     "frontend/src/App.tsx",
-    "frontend/src/components/AllTimeStandings.tsx",
-    "frontend/src/components/Leaderboard.tsx",
     "frontend/src/hooks/useQueries.ts",
     "project_state.json"
   ]

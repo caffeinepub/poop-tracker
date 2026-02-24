@@ -2,26 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-revert-app-tsx-to-the-working-version-that-existed-before-the-efficient-wiper-badge-features-and-the-subsequent-profile-loading-fixes-were-introduced-the-reverted-app-tsx-must-use-simple-direct-profile-detection-and-routing-logic-not-the-tri-state-loading-system-that-was-in-place-when-the-app-was-last-confirmed-working-remove-the-tri-state-loading-has-profile-no-profile-pattern-that-caused-the-app-to-get-stuck-on-the-loading-screen-indefinitely",
-      "featureTitle": "Revert App.tsx to the working version that existed before the Efficient Wiper badge features and the subsequent profile loading fixes were introduced. The reverted App.tsx must use simple, direct profile detection and routing logic — not the tri-state loading system — that was in place when the app was last confirmed working. Remove the tri-state ('loading'/'has-profile'/'no-profile') pattern that caused the app to get stuck on the loading screen indefinitely.",
-      "files": [
-        "frontend/src/App.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-28"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-revert-usequeries-ts-to-the-working-version-that-existed-before-the-efficient-wiper-badge-features-and-profile-loading-fixes-were-introduced-remove-the-guarded-useprofile-hook-rewrite-that-was-added-in-the-problematic-versions-restoring-the-original-profile-fetching-logic-that-worked-correctly-prior-to-those-changes",
-      "featureTitle": "Revert useQueries.ts to the working version that existed before the Efficient Wiper badge features and profile loading fixes were introduced. Remove the guarded useProfile hook rewrite that was added in the problematic versions, restoring the original profile-fetching logic that worked correctly prior to those changes.",
+      "featureId": "feature-rewrite-the-useprofile-hook-in-usequeries-ts-using-a-manual-async-approach-use-a-plain-react-usestate-useeffect-or-usequery-with-enabled-guard-so-the-backend-getprofile-call-is-only-fired-after-the-actor-is-confirmed-non-null-the-hook-must-remain-in-a-loading-state-isloading-true-data-undefined-while-the-actor-is-undefined-or-null-and-only-transition-to-a-settled-state-isloading-false-after-the-async-call-has-fully-resolved-it-must-never-return-a-null-empty-profile-result-before-the-backend-call-has-actually-completed",
+      "featureTitle": "Rewrite the useProfile hook in useQueries.ts using a manual async approach: use a plain React useState + useEffect (or useQuery with enabled guard) so the backend getProfile call is only fired after the actor is confirmed non-null. The hook must remain in a 'loading' state (isLoading: true, data: undefined) while the actor is undefined or null, and only transition to a settled state (isLoading: false) after the async call has fully resolved. It must never return a null/empty profile result before the backend call has actually completed.",
       "files": [
         "frontend/src/hooks/useQueries.ts"
       ],
@@ -33,15 +15,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-29"
+        "REQ-32"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-revert-the-leaderboard-tsx-component-to-the-working-version-before-the-efficient-wiper-badge-was-added-remove-the-efficient-wiper-award-category-from-the-top-badges-section-restoring-only-king-pooper-king-wiper-and-the-mvp-badge-the-lifetime-daily-toggle-must-remain-intact",
-      "featureTitle": "Revert the Leaderboard.tsx component to the working version before the Efficient Wiper badge was added. Remove The Efficient Wiper award category from the top badges section, restoring only King Pooper, King Wiper, and the MVP badge. The lifetime/daily toggle must remain intact.",
+      "featureId": "feature-rewrite-the-routing-profile-detection-logic-in-app-tsx-using-a-simple-two-phase-approach-phase-1-show-a-full-screen-loading-spinner-while-the-actor-is-not-yet-initialized-or-while-the-profile-query-has-not-yet-settled-isloading-is-true-phase-2-once-the-query-has-settled-if-a-profile-exists-navigate-to-the-dashboard-if-no-profile-exists-navigate-to-profilesetup-do-not-use-a-tri-state-enum-pattern-do-not-make-any-routing-decision-render-profilesetup-or-dashboard-until-both-conditions-are-true-actor-is-non-null-and-isloading-is-false",
+      "featureTitle": "Rewrite the routing/profile-detection logic in App.tsx using a simple two-phase approach: Phase 1 — show a full-screen loading spinner while the actor is not yet initialized OR while the profile query has not yet settled (isLoading is true). Phase 2 — once the query has settled, if a profile exists navigate to the Dashboard; if no profile exists navigate to ProfileSetup. Do NOT use a tri-state enum pattern. Do NOT make any routing decision (render ProfileSetup or Dashboard) until both conditions are true: actor is non-null AND isLoading is false.",
       "files": [
-        "frontend/src/components/Leaderboard.tsx"
+        "frontend/src/App.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -51,15 +33,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-30"
+        "REQ-33"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-revert-the-alltimestandings-tsx-component-to-the-working-version-before-the-efficient-wiper-highlighting-was-added-remove-any-visual-highlighting-or-indication-of-the-efficient-wiper-from-both-lifetime-and-daily-standings-tables-the-standings-table-must-still-show-columns-for-display-name-emoji-total-poops-total-wipes-toilet-paper-rolls-used-and-average-wipes-per-poop-and-must-still-respond-to-the-lifetime-daily-toggle",
-      "featureTitle": "Revert the AllTimeStandings.tsx component to the working version before The Efficient Wiper highlighting was added. Remove any visual highlighting or indication of The Efficient Wiper from both lifetime and daily standings tables. The standings table must still show columns for display name/emoji, total poops, total wipes, toilet paper rolls used, and average wipes per poop, and must still respond to the lifetime/daily toggle.",
+      "featureId": "feature-add-a-safety-timeout-to-the-profile-loading-sequence-in-app-tsx-if-after-10-seconds-the-actor-is-still-not-initialized-or-the-profile-query-has-not-resolved-treat-the-state-as-no-profile-and-allow-the-user-to-proceed-to-profilesetup-rather-than-staying-stuck-indefinitely-display-a-user-friendly-message-in-the-loading-state-such-as-loading-your-profile",
+      "featureTitle": "Add a safety timeout to the profile loading sequence in App.tsx: if after 10 seconds the actor is still not initialized or the profile query has not resolved, treat the state as 'no profile' and allow the user to proceed to ProfileSetup rather than staying stuck indefinitely. Display a user-friendly message in the loading state such as 'Loading your profile…'.",
       "files": [
-        "frontend/src/components/AllTimeStandings.tsx"
+        "frontend/src/App.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -69,7 +51,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-31"
+        "REQ-34"
       ],
       "confidence": "high"
     }

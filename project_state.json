@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 21,
+  "projectStateVersion": 23,
   "summary": "Poop tracker app - A playful group tracker where friends log poops and wipes with leaderboards and daily progress views",
   "architectural_notes": [
     "Use Internet Identity for simple passkey-based authentication",
@@ -13,7 +13,8 @@
   ],
   "known_issues": [
     "Profile creation screen blocks access to main page after login even when an existing profile is present — profile lookup fails to retrieve existing profile and falls through to creation flow",
-    "Version 9 profile loading fix caused app to get stuck on loading screen indefinitely; rolled back to pre-Efficient Wiper version"
+    "Version 9 profile loading fix caused app to get stuck on loading screen indefinitely; rolled back to pre-Efficient Wiper version",
+    "Version 10 still redirects to profile creation screen on startup even when user already has a profile — app gets stuck on profile creation; profile lookup resolves to 'no profile' before backend call completes"
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -214,6 +215,30 @@
       "title": "Revert the AllTimeStandings.tsx component to the working version before The Efficient Wiper highlighting was added. Remove any visual highlighting or indication of The Efficient Wiper from both lifetime and daily standings tables. The standings table must still show columns for display name/emoji, total poops, total wipes, toilet paper rolls used, and average wipes per poop, and must still respond to the lifetime/daily toggle.",
       "reqIds": [
         "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-rewrite-the-useprofile-hook-in-usequeries-ts-using-a-manual-async-approach-use-a-plain-react-usestate-useeffect-or-usequery-with-enabled-guard-so-the-backend-getprofile-call-is-only-fired-after-the-actor-is-confirmed-non-null-the-hook-must-remain-in-a-loading-state-isloading-true-data-undefined-while-the-actor-is-undefined-or-null-and-only-transition-to-a-settled-state-isloading-false-after-the-async-call-has-fully-resolved-it-must-never-return-a-null-empty-profile-result-before-the-backend-call-has-actually-completed",
+      "title": "Rewrite the useProfile hook in useQueries.ts using a manual async approach: use a plain React useState + useEffect (or useQuery with enabled guard) so the backend getProfile call is only fired after the actor is confirmed non-null. The hook must remain in a 'loading' state (isLoading: true, data: undefined) while the actor is undefined or null, and only transition to a settled state (isLoading: false) after the async call has fully resolved. It must never return a null/empty profile result before the backend call has actually completed.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-rewrite-the-routing-profile-detection-logic-in-app-tsx-using-a-simple-two-phase-approach-phase-1-show-a-full-screen-loading-spinner-while-the-actor-is-not-yet-initialized-or-while-the-profile-query-has-not-yet-settled-isloading-is-true-phase-2-once-the-query-has-settled-if-a-profile-exists-navigate-to-the-dashboard-if-no-profile-exists-navigate-to-profilesetup-do-not-use-a-tri-state-enum-pattern-do-not-make-any-routing-decision-render-profilesetup-or-dashboard-until-both-conditions-are-true-actor-is-non-null-and-isloading-is-false",
+      "title": "Rewrite the routing/profile-detection logic in App.tsx using a simple two-phase approach: Phase 1 — show a full-screen loading spinner while the actor is not yet initialized OR while the profile query has not yet settled (isLoading is true). Phase 2 — once the query has settled, if a profile exists navigate to the Dashboard; if no profile exists navigate to ProfileSetup. Do NOT use a tri-state enum pattern. Do NOT make any routing decision (render ProfileSetup or Dashboard) until both conditions are true: actor is non-null AND isLoading is false.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-safety-timeout-to-the-profile-loading-sequence-in-app-tsx-if-after-10-seconds-the-actor-is-still-not-initialized-or-the-profile-query-has-not-resolved-treat-the-state-as-no-profile-and-allow-the-user-to-proceed-to-profilesetup-rather-than-staying-stuck-indefinitely-display-a-user-friendly-message-in-the-loading-state-such-as-loading-your-profile",
+      "title": "Add a safety timeout to the profile loading sequence in App.tsx: if after 10 seconds the actor is still not initialized or the profile query has not resolved, treat the state as 'no profile' and allow the user to proceed to ProfileSetup rather than staying stuck indefinitely. Display a user-friendly message in the loading state such as 'Loading your profile…'.",
+      "reqIds": [
+        "REQ-34"
       ],
       "version": 1
     }

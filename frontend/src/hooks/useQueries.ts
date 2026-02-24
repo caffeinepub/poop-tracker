@@ -7,17 +7,32 @@ export function useMyProfile() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
 
+  const isActorReady = !!actor && !isFetching && !!identity;
+
   return useQuery<Profile | null>({
     queryKey: ['myProfile'],
     queryFn: async () => {
-      if (!actor) return null;
+      if (!actor) {
+        // This should never be reached due to `enabled`, but guard anyway
+        throw new Error('Actor not ready');
+      }
       try {
-        return await actor.getMyProfile();
+        const profile = await actor.getMyProfile();
+        return profile;
       } catch {
+        // Backend throws when user is not registered — treat as no profile
         return null;
       }
     },
-    enabled: !!actor && !isFetching && !!identity,
+    // CRITICAL: only run the query when the actor is fully ready.
+    // While enabled=false, isLoading stays false but data stays undefined.
+    // We handle the "actor not ready" loading state in App.tsx by checking isActorReady.
+    enabled: isActorReady,
+    // Never use stale data for profile detection — always fetch fresh on mount
+    staleTime: 0,
+    // Retry once in case of transient network issues, but not more
+    retry: 1,
+    retryDelay: 1000,
   });
 }
 
