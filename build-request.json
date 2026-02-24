@@ -1,0 +1,62 @@
+{
+  "kind": "build_request",
+  "title": "Fix profile detection routing — stop redirecting existing users to ProfileSetup",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-26",
+      "text": "Rewrite the profile detection and routing logic in App.tsx from scratch. The app must not render ProfileSetup or make any routing decision until BOTH the actor is fully initialized AND the profile query has completed (i.e., is no longer in a loading/pending state). Introduce an explicit tri-state: 'loading' (actor not ready OR query in flight), 'has-profile' (query resolved with a profile), 'no-profile' (query resolved with null/empty). Only navigate to ProfileSetup when state is definitively 'no-profile'. Show a full-screen loading indicator during the 'loading' state.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6",
+          "msg-7"
+        ],
+        "quotes": [
+          "its still not working. it still directing me to the profile creation page even though I already have a profile",
+          "I'll fix this by ensuring the app waits for both the actor to be fully initialized and the profile query to fully resolve before making any routing decisions, and I'll add a proper loading state so it never falls through to ProfileSetup prematurely."
+        ]
+      },
+      "acceptanceCriteria": [
+        "A user with an existing profile who authenticates via Internet Identity is taken directly to the Dashboard without ever seeing ProfileSetup.",
+        "ProfileSetup is only shown when the profile query has fully resolved and returned no profile for the authenticated principal.",
+        "A full-screen loading indicator is displayed while the actor is initializing or the profile query is in flight.",
+        "No routing decision is made until both the actor is ready AND the profile query status is 'success' or 'error'.",
+        "A brand-new user (no existing profile) is still correctly routed to ProfileSetup after authentication."
+      ]
+    },
+    {
+      "id": "REQ-27",
+      "text": "Rewrite the useProfile hook in useQueries.ts to guarantee it never returns a 'no profile' result prematurely. The hook must: (1) remain in a loading/pending state while the actor is not yet initialized, (2) only resolve to a 'no profile' result after the async backend call has fully completed and returned a definitive empty/null response, and (3) never fire the backend query if the actor is undefined or not ready.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6",
+          "msg-7"
+        ],
+        "quotes": [
+          "its still not working. it still directing me to the profile creation page even though I already have a profile"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The profile hook's isLoading flag is true whenever the actor is undefined or the query is in flight.",
+        "The hook never calls the backend actor if actor is null/undefined.",
+        "The hook only reports 'no profile found' after the async call has returned a definitive null/empty result.",
+        "Existing users see their profile data returned correctly on first load without a false 'no profile' intermediate state."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify any files listed under frontend.immutablePaths.",
+    "All routing decisions must be deferred until both actor readiness and profile query completion are confirmed."
+  ],
+  "nonGoals": [
+    "Changes to the backend Motoko actor or data model.",
+    "Any changes to the ProfileSetup form UI or fields.",
+    "Changes to leaderboard, standings, or other unrelated components."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

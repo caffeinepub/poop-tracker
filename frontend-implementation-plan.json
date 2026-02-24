@@ -1,0 +1,42 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Fix profile detection routing — stop redirecting existing users to ProfileSetup",
+  "requirements": [
+    {
+      "id": "REQ-26",
+      "summary": "Rewrite profile detection and routing logic in App.tsx to enforce tri-state profile loading (loading/has-profile/no-profile) and defer all routing decisions until both actor initialization and profile query completion are confirmed",
+      "acceptanceCriteria": [
+        "A user with an existing profile who authenticates via Internet Identity is taken directly to the Dashboard without ever seeing ProfileSetup.",
+        "ProfileSetup is only shown when the profile query has fully resolved and returned no profile for the authenticated principal.",
+        "A full-screen loading indicator is displayed while the actor is initializing or the profile query is in flight.",
+        "No routing decision is made until both the actor is ready AND the profile query status is 'success' or 'error'.",
+        "A brand-new user (no existing profile) is still correctly routed to ProfileSetup after authentication."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Completely rewrite the profile detection and routing logic. Introduce an explicit tri-state variable ('loading', 'has-profile', 'no-profile') derived from both actor readiness (isActorReady from useActor) and profile query completion (isLoading, isSuccess, data from useProfile). Ensure the app remains in 'loading' state while actor is undefined OR profile query is pending. Only transition to 'has-profile' when actor is ready AND profile query succeeded with non-null data. Only transition to 'no-profile' when actor is ready AND profile query succeeded with null/empty data. Render a full-screen loading indicator (using existing loading UI pattern) during 'loading' state. Conditionally render ProfileSetup only when state is 'no-profile'. Conditionally render Layout with routes only when state is 'has-profile'. Do not make any routing decision until both conditions are definitively resolved."
+        }
+      ]
+    },
+    {
+      "id": "REQ-27",
+      "summary": "Rewrite useProfile hook in useQueries.ts to guarantee it never returns a 'no profile' result prematurely by gating the query on actor readiness and ensuring proper loading states",
+      "acceptanceCriteria": [
+        "The profile hook's isLoading flag is true whenever the actor is undefined or the query is in flight.",
+        "The hook never calls the backend actor if actor is null/undefined.",
+        "The hook only reports 'no profile found' after the async call has returned a definitive null/empty result.",
+        "Existing users see their profile data returned correctly on first load without a false 'no profile' intermediate state."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Rewrite the useProfile hook to add strict actor readiness gating. Use the 'enabled' option in the useQuery configuration to prevent the query from running if actor is null or undefined. Ensure the queryFn checks for actor existence and throws an error or returns null gracefully if actor is missing. Update the hook to guarantee isLoading remains true while actor is undefined OR while the async backend call is in flight. Only allow the hook to resolve to a 'no profile' state (data: null) after the backend call has definitively completed and returned null or an empty result. Do not allow any intermediate false-negative states where the query resolves prematurely before actor initialization."
+        }
+      ]
+    }
+  ]
+}

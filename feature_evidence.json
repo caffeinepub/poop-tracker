@@ -1,0 +1,41 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-rewrite-the-profile-detection-and-routing-logic-in-app-tsx-from-scratch-the-app-must-not-render-profilesetup-or-make-any-routing-decision-until-both-the-actor-is-fully-initialized-and-the-profile-query-has-completed-i-e-is-no-longer-in-a-loading-pending-state-introduce-an-explicit-tri-state-loading-actor-not-ready-or-query-in-flight-has-profile-query-resolved-with-a-profile-no-profile-query-resolved-with-null-empty-only-navigate-to-profilesetup-when-state-is-definitively-no-profile-show-a-full-screen-loading-indicator-during-the-loading-state",
+      "featureTitle": "Rewrite the profile detection and routing logic in App.tsx from scratch. The app must not render ProfileSetup or make any routing decision until BOTH the actor is fully initialized AND the profile query has completed (i.e., is no longer in a loading/pending state). Introduce an explicit tri-state: 'loading' (actor not ready OR query in flight), 'has-profile' (query resolved with a profile), 'no-profile' (query resolved with null/empty). Only navigate to ProfileSetup when state is definitively 'no-profile'. Show a full-screen loading indicator during the 'loading' state.",
+      "files": [
+        "frontend/src/App.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-26"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-rewrite-the-useprofile-hook-in-usequeries-ts-to-guarantee-it-never-returns-a-no-profile-result-prematurely-the-hook-must-1-remain-in-a-loading-pending-state-while-the-actor-is-not-yet-initialized-2-only-resolve-to-a-no-profile-result-after-the-async-backend-call-has-fully-completed-and-returned-a-definitive-empty-null-response-and-3-never-fire-the-backend-query-if-the-actor-is-undefined-or-not-ready",
+      "featureTitle": "Rewrite the useProfile hook in useQueries.ts to guarantee it never returns a 'no profile' result prematurely. The hook must: (1) remain in a loading/pending state while the actor is not yet initialized, (2) only resolve to a 'no profile' result after the async backend call has fully completed and returned a definitive empty/null response, and (3) never fire the backend query if the actor is undefined or not ready.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-27"
+      ],
+      "confidence": "high"
+    }
+  ]
+}
