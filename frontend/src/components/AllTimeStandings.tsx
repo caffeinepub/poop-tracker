@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Crown, Scroll, Trophy, Sparkles } from 'lucide-react';
+import { Crown, Scroll, Trophy } from 'lucide-react';
 import { useRankedUserStats } from '../hooks/useQueries';
 import ProfilePreview from './ProfilePreview';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -53,21 +53,13 @@ export default function AllTimeStandings() {
   });
 
   // Find leaders
-  const kingPooper = sortedStats.reduce((max, user) => 
+  const kingPooper = sortedStats.reduce((max, user) =>
     Number(user.totalPoops) > Number(max.totalPoops) ? user : max
   , sortedStats[0]);
 
-  const kingWiper = sortedStats.reduce((max, user) => 
+  const kingWiper = sortedStats.reduce((max, user) =>
     Number(user.totalWipes) > Number(max.totalWipes) ? user : max
   , sortedStats[0]);
-
-  // Find The Efficient Wiper (lowest avgWipesPerPoop, must have at least 1 poop)
-  const usersWithPoops = sortedStats.filter(user => Number(user.totalPoops) > 0);
-  const efficientWiper = usersWithPoops.length > 0 
-    ? usersWithPoops.reduce((min, user) => 
-        Number(user.avgWipesPerPoop) < Number(min.avgWipesPerPoop) ? user : min
-      , usersWithPoops[0])
-    : null;
 
   const calculateTPRolls = (totalWipes: bigint): string => {
     const sheetsPerWipe = 3;
@@ -110,8 +102,7 @@ export default function AllTimeStandings() {
               {sortedStats.map((user, index) => {
                 const isKingPooper = user.principal.toString() === kingPooper.principal.toString();
                 const isKingWiper = user.principal.toString() === kingWiper.principal.toString();
-                const isEfficientWiper = efficientWiper && user.principal.toString() === efficientWiper.principal.toString();
-                
+
                 return (
                   <TableRow key={user.principal.toString()}>
                     <TableCell className="font-bold text-muted-foreground">
@@ -122,20 +113,17 @@ export default function AllTimeStandings() {
                         <ProfilePreview profile={user.profile} size="sm" showName={false} />
                         <div className="flex flex-col">
                           <span className="font-bold">{user.profile.displayName}</span>
-                          <div className="flex gap-1 mt-1">
+                          <div className="flex gap-1 mt-1 flex-wrap">
                             {isKingPooper && (
-                              <Badge variant="secondary" className="text-xs px-1 py-0">
-                                <Crown className="h-3 w-3 text-amber-500" />
+                              <Badge className="bg-amber-500 text-white text-xs px-1 py-0 h-5">
+                                <Crown className="h-2.5 w-2.5 mr-0.5" />
+                                King Pooper
                               </Badge>
                             )}
                             {isKingWiper && (
-                              <Badge variant="secondary" className="text-xs px-1 py-0">
-                                <Scroll className="h-3 w-3 text-orange-500" />
-                              </Badge>
-                            )}
-                            {isEfficientWiper && (
-                              <Badge variant="secondary" className="text-xs px-1 py-0">
-                                <Sparkles className="h-3 w-3 text-emerald-500" />
+                              <Badge className="bg-orange-500 text-white text-xs px-1 py-0 h-5">
+                                <Scroll className="h-2.5 w-2.5 mr-0.5" />
+                                King Wiper
                               </Badge>
                             )}
                           </div>
@@ -159,10 +147,6 @@ export default function AllTimeStandings() {
               })}
             </TableBody>
           </Table>
-        </div>
-        <div className="mt-4 text-xs text-muted-foreground space-y-1">
-          <p>💡 <strong>TP Rolls:</strong> Calculated using 3 sheets per wipe, 200 sheets per roll</p>
-          <p>📊 <strong>Avg Wipes:</strong> Total wipes divided by total poops</p>
         </div>
       </CardContent>
     </Card>

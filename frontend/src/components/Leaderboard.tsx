@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Crown, Scroll, Sparkles } from 'lucide-react';
+import { Crown, Scroll } from 'lucide-react';
 import { useRankedUserStats } from '../hooks/useQueries';
 import ProfilePreview from './ProfilePreview';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,7 +20,6 @@ export default function Leaderboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <Skeleton className="h-24 w-full" />
             <Skeleton className="h-24 w-full" />
             <Skeleton className="h-24 w-full" />
           </div>
@@ -58,16 +57,7 @@ export default function Leaderboard() {
     Number(user.totalWipes) > Number(max.totalWipes) ? user : max
   , userStats[0]);
 
-  // Find The Efficient Wiper (lowest avgWipesPerPoop, must have at least 1 poop to avoid division-by-zero)
-  const usersWithPoops = userStats.filter(user => Number(user.totalPoops) > 0);
-  const efficientWiper = usersWithPoops.length > 0
-    ? usersWithPoops.reduce((min, user) =>
-        Number(user.avgWipesPerPoop) < Number(min.avgWipesPerPoop) ? user : min
-      , usersWithPoops[0])
-    : null;
-
   // MVP: the same person holds BOTH King Pooper AND King Wiper titles
-  // The Efficient Wiper is a standalone badge and does NOT factor into MVP
   const isMVP =
     kingPooper.principal.toString() === kingWiper.principal.toString();
 
@@ -83,7 +73,7 @@ export default function Leaderboard() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2">
           {/* King Pooper */}
           <div className="relative rounded-lg border-2 border-amber-500 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 p-4">
             <div className="absolute -top-3 left-4">
@@ -135,29 +125,6 @@ export default function Leaderboard() {
               )}
             </div>
           </div>
-
-          {/* The Efficient Wiper — standalone badge, not part of MVP */}
-          {efficientWiper && (
-            <div className="relative rounded-lg border-2 border-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 p-4">
-              <div className="absolute -top-3 left-4">
-                <Badge className="bg-emerald-500 text-white font-black">
-                  <Sparkles className="h-3 w-3 mr-1" />
-                  The Efficient Wiper
-                </Badge>
-              </div>
-              <div className="flex flex-col items-center gap-3 pt-2">
-                <ProfilePreview profile={efficientWiper.profile} size="lg" showName={true} />
-                <div className="text-center">
-                  <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400">
-                    {efficientWiper.avgWipesPerPoop.toString()}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Avg Wipes/Poop
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {isMVP && (

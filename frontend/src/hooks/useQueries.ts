@@ -4,30 +4,20 @@ import { useInternetIdentity } from './useInternetIdentity';
 import type { Profile, UserStats } from '../backend';
 
 export function useMyProfile() {
-  const { actor, isFetching: isActorFetching } = useActor();
-  const { identity, isInitializing } = useInternetIdentity();
-
-  const identityPrincipal = identity?.getPrincipal().toString();
+  const { actor, isFetching } = useActor();
+  const { identity } = useInternetIdentity();
 
   return useQuery<Profile | null>({
-    queryKey: ['myProfile', identityPrincipal],
+    queryKey: ['myProfile'],
     queryFn: async () => {
-      if (!actor || !identity) return null;
+      if (!actor) return null;
       try {
         return await actor.getMyProfile();
       } catch {
-        // Backend traps when user is not registered — treat as no profile
         return null;
       }
     },
-    // Only run when:
-    // - identity initialization is complete
-    // - identity is present (authenticated user)
-    // - actor exists and is not being recreated
-    enabled: !isInitializing && !!identity && !!actor && !isActorFetching,
-    // Never serve stale profile data
-    staleTime: 0,
-    retry: 1,
+    enabled: !!actor && !isFetching && !!identity,
   });
 }
 

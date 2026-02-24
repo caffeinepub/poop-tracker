@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 19,
+  "projectStateVersion": 21,
   "summary": "Poop tracker app - A playful group tracker where friends log poops and wipes with leaderboards and daily progress views",
   "architectural_notes": [
     "Use Internet Identity for simple passkey-based authentication",
@@ -12,7 +12,8 @@
     "The Efficient Wiper badge is standalone and awarded to the user with the lowest average wipes per poop; no minimum poop requirement; MVP title remains tied only to King Pooper + King Wiper"
   ],
   "known_issues": [
-    "Profile creation screen blocks access to main page after login even when an existing profile is present — profile lookup fails to retrieve existing profile and falls through to creation flow"
+    "Profile creation screen blocks access to main page after login even when an existing profile is present — profile lookup fails to retrieve existing profile and falls through to creation flow",
+    "Version 9 profile loading fix caused app to get stuck on loading screen indefinitely; rolled back to pre-Efficient Wiper version"
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -181,6 +182,38 @@
       "title": "Rewrite the useProfile hook in useQueries.ts to guarantee it never returns a 'no profile' result prematurely. The hook must: (1) remain in a loading/pending state while the actor is not yet initialized, (2) only resolve to a 'no profile' result after the async backend call has fully completed and returned a definitive empty/null response, and (3) never fire the backend query if the actor is undefined or not ready.",
       "reqIds": [
         "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-revert-app-tsx-to-the-working-version-that-existed-before-the-efficient-wiper-badge-features-and-the-subsequent-profile-loading-fixes-were-introduced-the-reverted-app-tsx-must-use-simple-direct-profile-detection-and-routing-logic-not-the-tri-state-loading-system-that-was-in-place-when-the-app-was-last-confirmed-working-remove-the-tri-state-loading-has-profile-no-profile-pattern-that-caused-the-app-to-get-stuck-on-the-loading-screen-indefinitely",
+      "title": "Revert App.tsx to the working version that existed before the Efficient Wiper badge features and the subsequent profile loading fixes were introduced. The reverted App.tsx must use simple, direct profile detection and routing logic — not the tri-state loading system — that was in place when the app was last confirmed working. Remove the tri-state ('loading'/'has-profile'/'no-profile') pattern that caused the app to get stuck on the loading screen indefinitely.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-revert-usequeries-ts-to-the-working-version-that-existed-before-the-efficient-wiper-badge-features-and-profile-loading-fixes-were-introduced-remove-the-guarded-useprofile-hook-rewrite-that-was-added-in-the-problematic-versions-restoring-the-original-profile-fetching-logic-that-worked-correctly-prior-to-those-changes",
+      "title": "Revert useQueries.ts to the working version that existed before the Efficient Wiper badge features and profile loading fixes were introduced. Remove the guarded useProfile hook rewrite that was added in the problematic versions, restoring the original profile-fetching logic that worked correctly prior to those changes.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-revert-the-leaderboard-tsx-component-to-the-working-version-before-the-efficient-wiper-badge-was-added-remove-the-efficient-wiper-award-category-from-the-top-badges-section-restoring-only-king-pooper-king-wiper-and-the-mvp-badge-the-lifetime-daily-toggle-must-remain-intact",
+      "title": "Revert the Leaderboard.tsx component to the working version before the Efficient Wiper badge was added. Remove The Efficient Wiper award category from the top badges section, restoring only King Pooper, King Wiper, and the MVP badge. The lifetime/daily toggle must remain intact.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-revert-the-alltimestandings-tsx-component-to-the-working-version-before-the-efficient-wiper-highlighting-was-added-remove-any-visual-highlighting-or-indication-of-the-efficient-wiper-from-both-lifetime-and-daily-standings-tables-the-standings-table-must-still-show-columns-for-display-name-emoji-total-poops-total-wipes-toilet-paper-rolls-used-and-average-wipes-per-poop-and-must-still-respond-to-the-lifetime-daily-toggle",
+      "title": "Revert the AllTimeStandings.tsx component to the working version before The Efficient Wiper highlighting was added. Remove any visual highlighting or indication of The Efficient Wiper from both lifetime and daily standings tables. The standings table must still show columns for display name/emoji, total poops, total wipes, toilet paper rolls used, and average wipes per poop, and must still respond to the lifetime/daily toggle.",
+      "reqIds": [
+        "REQ-31"
       ],
       "version": 1
     }

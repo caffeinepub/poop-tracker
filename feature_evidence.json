@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-rewrite-the-profile-detection-and-routing-logic-in-app-tsx-from-scratch-the-app-must-not-render-profilesetup-or-make-any-routing-decision-until-both-the-actor-is-fully-initialized-and-the-profile-query-has-completed-i-e-is-no-longer-in-a-loading-pending-state-introduce-an-explicit-tri-state-loading-actor-not-ready-or-query-in-flight-has-profile-query-resolved-with-a-profile-no-profile-query-resolved-with-null-empty-only-navigate-to-profilesetup-when-state-is-definitively-no-profile-show-a-full-screen-loading-indicator-during-the-loading-state",
-      "featureTitle": "Rewrite the profile detection and routing logic in App.tsx from scratch. The app must not render ProfileSetup or make any routing decision until BOTH the actor is fully initialized AND the profile query has completed (i.e., is no longer in a loading/pending state). Introduce an explicit tri-state: 'loading' (actor not ready OR query in flight), 'has-profile' (query resolved with a profile), 'no-profile' (query resolved with null/empty). Only navigate to ProfileSetup when state is definitively 'no-profile'. Show a full-screen loading indicator during the 'loading' state.",
+      "featureId": "feature-revert-app-tsx-to-the-working-version-that-existed-before-the-efficient-wiper-badge-features-and-the-subsequent-profile-loading-fixes-were-introduced-the-reverted-app-tsx-must-use-simple-direct-profile-detection-and-routing-logic-not-the-tri-state-loading-system-that-was-in-place-when-the-app-was-last-confirmed-working-remove-the-tri-state-loading-has-profile-no-profile-pattern-that-caused-the-app-to-get-stuck-on-the-loading-screen-indefinitely",
+      "featureTitle": "Revert App.tsx to the working version that existed before the Efficient Wiper badge features and the subsequent profile loading fixes were introduced. The reverted App.tsx must use simple, direct profile detection and routing logic — not the tri-state loading system — that was in place when the app was last confirmed working. Remove the tri-state ('loading'/'has-profile'/'no-profile') pattern that caused the app to get stuck on the loading screen indefinitely.",
       "files": [
         "frontend/src/App.tsx"
       ],
@@ -15,13 +15,13 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-26"
+        "REQ-28"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-rewrite-the-useprofile-hook-in-usequeries-ts-to-guarantee-it-never-returns-a-no-profile-result-prematurely-the-hook-must-1-remain-in-a-loading-pending-state-while-the-actor-is-not-yet-initialized-2-only-resolve-to-a-no-profile-result-after-the-async-backend-call-has-fully-completed-and-returned-a-definitive-empty-null-response-and-3-never-fire-the-backend-query-if-the-actor-is-undefined-or-not-ready",
-      "featureTitle": "Rewrite the useProfile hook in useQueries.ts to guarantee it never returns a 'no profile' result prematurely. The hook must: (1) remain in a loading/pending state while the actor is not yet initialized, (2) only resolve to a 'no profile' result after the async backend call has fully completed and returned a definitive empty/null response, and (3) never fire the backend query if the actor is undefined or not ready.",
+      "featureId": "feature-revert-usequeries-ts-to-the-working-version-that-existed-before-the-efficient-wiper-badge-features-and-profile-loading-fixes-were-introduced-remove-the-guarded-useprofile-hook-rewrite-that-was-added-in-the-problematic-versions-restoring-the-original-profile-fetching-logic-that-worked-correctly-prior-to-those-changes",
+      "featureTitle": "Revert useQueries.ts to the working version that existed before the Efficient Wiper badge features and profile loading fixes were introduced. Remove the guarded useProfile hook rewrite that was added in the problematic versions, restoring the original profile-fetching logic that worked correctly prior to those changes.",
       "files": [
         "frontend/src/hooks/useQueries.ts"
       ],
@@ -33,7 +33,43 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-27"
+        "REQ-29"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-revert-the-leaderboard-tsx-component-to-the-working-version-before-the-efficient-wiper-badge-was-added-remove-the-efficient-wiper-award-category-from-the-top-badges-section-restoring-only-king-pooper-king-wiper-and-the-mvp-badge-the-lifetime-daily-toggle-must-remain-intact",
+      "featureTitle": "Revert the Leaderboard.tsx component to the working version before the Efficient Wiper badge was added. Remove The Efficient Wiper award category from the top badges section, restoring only King Pooper, King Wiper, and the MVP badge. The lifetime/daily toggle must remain intact.",
+      "files": [
+        "frontend/src/components/Leaderboard.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-30"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-revert-the-alltimestandings-tsx-component-to-the-working-version-before-the-efficient-wiper-highlighting-was-added-remove-any-visual-highlighting-or-indication-of-the-efficient-wiper-from-both-lifetime-and-daily-standings-tables-the-standings-table-must-still-show-columns-for-display-name-emoji-total-poops-total-wipes-toilet-paper-rolls-used-and-average-wipes-per-poop-and-must-still-respond-to-the-lifetime-daily-toggle",
+      "featureTitle": "Revert the AllTimeStandings.tsx component to the working version before The Efficient Wiper highlighting was added. Remove any visual highlighting or indication of The Efficient Wiper from both lifetime and daily standings tables. The standings table must still show columns for display name/emoji, total poops, total wipes, toilet paper rolls used, and average wipes per poop, and must still respond to the lifetime/daily toggle.",
+      "files": [
+        "frontend/src/components/AllTimeStandings.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-31"
       ],
       "confidence": "high"
     }

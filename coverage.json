@@ -1,18 +1,18 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T18:18:38.113Z",
+  "generatedAt": "2026-02-24T18:49:11.662Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 2,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
-        "id": "REQ-26",
-        "summary": "Rewrite the profile detection and routing logic in App.tsx from scratch. The app must not render ProfileSetup or make any routing decision until BOTH the actor is fully initialized AND the profile query has completed (i.e., is no longer in a loading/pending state). Introduce an explicit tri-state: 'loading' (actor not ready OR query in flight), 'has-profile' (query resolved with a profile), 'no-profile' (query resolved with null/empty). Only navigate to ProfileSetup when state is definitively 'no-profile'. Show a full-screen loading indicator during the 'loading' state.",
+        "id": "REQ-28",
+        "summary": "Revert App.tsx to the working version that existed before the Efficient Wiper badge features and the subsequent profile loading fixes were introduced. The reverted App.tsx must use simple, direct profile detection and routing logic — not the tri-state loading system — that was in place when the app was last confirmed working. Remove the tri-state ('loading'/'has-profile'/'no-profile') pattern that caused the app to get stuck on the loading screen indefinitely.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/App.tsx"
@@ -22,14 +22,36 @@
         ]
       },
       {
-        "id": "REQ-27",
-        "summary": "Rewrite the useProfile hook in useQueries.ts to guarantee it never returns a 'no profile' result prematurely. The hook must: (1) remain in a loading/pending state while the actor is not yet initialized, (2) only resolve to a 'no profile' result after the async backend call has fully completed and returned a definitive empty/null response, and (3) never fire the backend query if the actor is undefined or not ready.",
+        "id": "REQ-29",
+        "summary": "Revert useQueries.ts to the working version that existed before the Efficient Wiper badge features and profile loading fixes were introduced. Remove the guarded useProfile hook rewrite that was added in the problematic versions, restoring the original profile-fetching logic that worked correctly prior to those changes.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
           "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-30",
+        "summary": "Revert the Leaderboard.tsx component to the working version before the Efficient Wiper badge was added. Remove The Efficient Wiper award category from the top badges section, restoring only King Pooper, King Wiper, and the MVP badge. The lifetime/daily toggle must remain intact.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Leaderboard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Leaderboard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-31",
+        "summary": "Revert the AllTimeStandings.tsx component to the working version before The Efficient Wiper highlighting was added. Remove any visual highlighting or indication of The Efficient Wiper from both lifetime and daily standings tables. The standings table must still show columns for display name/emoji, total poops, total wipes, toilet paper rolls used, and average wipes per poop, and must still respond to the lifetime/daily toggle.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/AllTimeStandings.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/AllTimeStandings.tsx"
         ]
       }
     ]
@@ -40,6 +62,8 @@
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/App.tsx",
+    "frontend/src/components/AllTimeStandings.tsx",
+    "frontend/src/components/Leaderboard.tsx",
     "frontend/src/hooks/useQueries.ts",
     "project_state.json",
     "scratch/component-selection.json",

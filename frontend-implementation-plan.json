@@ -1,40 +1,68 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix profile detection routing — stop redirecting existing users to ProfileSetup",
+  "title": "Revert to last working version before Efficient Wiper changes",
   "requirements": [
     {
-      "id": "REQ-26",
-      "summary": "Rewrite profile detection and routing logic in App.tsx to enforce tri-state profile loading (loading/has-profile/no-profile) and defer all routing decisions until both actor initialization and profile query completion are confirmed",
+      "id": "REQ-28",
+      "summary": "Revert App.tsx to use simple profile detection and routing without tri-state loading pattern",
       "acceptanceCriteria": [
-        "A user with an existing profile who authenticates via Internet Identity is taken directly to the Dashboard without ever seeing ProfileSetup.",
-        "ProfileSetup is only shown when the profile query has fully resolved and returned no profile for the authenticated principal.",
-        "A full-screen loading indicator is displayed while the actor is initializing or the profile query is in flight.",
-        "No routing decision is made until both the actor is ready AND the profile query status is 'success' or 'error'.",
-        "A brand-new user (no existing profile) is still correctly routed to ProfileSetup after authentication."
+        "App no longer gets stuck on a loading screen after authenticating with Internet Identity",
+        "App.tsx does not contain the tri-state loading/has-profile/no-profile pattern from Version 9",
+        "Users can authenticate and reach the dashboard without the app hanging"
       ],
       "file_operations": [
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Completely rewrite the profile detection and routing logic. Introduce an explicit tri-state variable ('loading', 'has-profile', 'no-profile') derived from both actor readiness (isActorReady from useActor) and profile query completion (isLoading, isSuccess, data from useProfile). Ensure the app remains in 'loading' state while actor is undefined OR profile query is pending. Only transition to 'has-profile' when actor is ready AND profile query succeeded with non-null data. Only transition to 'no-profile' when actor is ready AND profile query succeeded with null/empty data. Render a full-screen loading indicator (using existing loading UI pattern) during 'loading' state. Conditionally render ProfileSetup only when state is 'no-profile'. Conditionally render Layout with routes only when state is 'has-profile'. Do not make any routing decision until both conditions are definitively resolved."
+          "description": "Replace the tri-state ('loading'/'has-profile'/'no-profile') profile detection system with the original simple, direct profile detection and routing logic that was working before the Efficient Wiper changes. Remove deferred routing and restore immediate route rendering with inline profile checks."
         }
       ]
     },
     {
-      "id": "REQ-27",
-      "summary": "Rewrite useProfile hook in useQueries.ts to guarantee it never returns a 'no profile' result prematurely by gating the query on actor readiness and ensuring proper loading states",
+      "id": "REQ-29",
+      "summary": "Revert useQueries.ts to original profile-fetching logic without guarded actor-initialization",
       "acceptanceCriteria": [
-        "The profile hook's isLoading flag is true whenever the actor is undefined or the query is in flight.",
-        "The hook never calls the backend actor if actor is null/undefined.",
-        "The hook only reports 'no profile found' after the async call has returned a definitive null/empty result.",
-        "Existing users see their profile data returned correctly on first load without a false 'no profile' intermediate state."
+        "useQueries.ts does not contain the guarded actor-initialization checks added in the broken versions",
+        "Profile fetching works correctly and does not cause the app to hang in a loading state"
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Rewrite the useProfile hook to add strict actor readiness gating. Use the 'enabled' option in the useQuery configuration to prevent the query from running if actor is null or undefined. Ensure the queryFn checks for actor existence and throws an error or returns null gracefully if actor is missing. Update the hook to guarantee isLoading remains true while actor is undefined OR while the async backend call is in flight. Only allow the hook to resolve to a 'no profile' state (data: null) after the backend call has definitively completed and returned null or an empty result. Do not allow any intermediate false-negative states where the query resolves prematurely before actor initialization."
+          "description": "Remove the guarded useProfile hook rewrite and restore the original profile-fetching logic that existed before the Efficient Wiper badge changes. Ensure the useProfile hook uses standard React Query patterns without additional actor-readiness guards."
+        }
+      ]
+    },
+    {
+      "id": "REQ-30",
+      "summary": "Remove Efficient Wiper badge from Leaderboard component while preserving lifetime/daily toggle",
+      "acceptanceCriteria": [
+        "Leaderboard.tsx shows only King Pooper, King Wiper, and MVP badge — no Efficient Wiper badge",
+        "Lifetime/daily toggle still functions correctly",
+        "No references to Efficient Wiper logic remain in Leaderboard.tsx"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Leaderboard.tsx",
+          "operation": "modify",
+          "description": "Remove The Efficient Wiper award category and all related logic from the top badges section. Restore the component to display only King Pooper, King Wiper, and MVP badge. Ensure the lifetime/daily toggle remains fully functional."
+        }
+      ]
+    },
+    {
+      "id": "REQ-31",
+      "summary": "Remove Efficient Wiper highlighting from AllTimeStandings table while preserving all columns and toggle",
+      "acceptanceCriteria": [
+        "AllTimeStandings.tsx contains no Efficient Wiper highlight or badge logic",
+        "Standings table still displays all required columns (display name/emoji, total poops, total wipes, TP rolls, avg wipes per poop)",
+        "Lifetime/daily toggle still works correctly in the standings table"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AllTimeStandings.tsx",
+          "operation": "modify",
+          "description": "Remove all Efficient Wiper visual highlighting and badge logic from the standings table. Preserve all existing columns (display name/emoji, total poops, total wipes, toilet paper rolls used, average wipes per poop) and ensure the lifetime/daily toggle continues to function correctly."
         }
       ]
     }

@@ -1,5 +1,5 @@
 {
-  "frontend/src/App.tsx": "Main app component with TanStack Router and a robust tri-state profile detection ('loading'/'has-profile'/'no-profile') that defers all routing decisions until identity initialization, actor creation, and profile query are all fully resolved — preventing premature fallthrough to ProfileSetup.",
+  "frontend/src/App.tsx": "Main app component with TanStack Router using simple, direct profile detection — shows loading while initializing, redirects to LoginPage if unauthenticated, shows ProfileSetup if no profile found, otherwise renders the main Layout with Outlet.",
   "frontend/src/pages/LoginPage.tsx": "Login page with playful poop emoji branding and Internet Identity authentication button.",
   "frontend/src/pages/ProfileSetup.tsx": "Profile creation page where users customize their display name, emoji, color, and background gradient with live preview. Emoji buttons now use flexbox centering (flex items-center justify-center) to ensure emojis are properly centered within their boxes on mobile devices.",
   "frontend/src/pages/Dashboard.tsx": "Main dashboard with welcome section, quick log button, leaderboard, and standings components displaying lifetime statistics only.",
@@ -9,8 +9,8 @@
   "frontend/src/constants/profileOptions.ts": "Preset options for profile customization including 40 emojis, 20 colors, and 12 gradient backgrounds.",
   "frontend/src/index.css": "Global styles with warm amber/orange OKLCH color palette for playful poop tracker theme in light and dark modes.",
   "frontend/tailwind.config.js": "Tailwind configuration with extended color system, custom border radius, and Inter font family.",
-  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations — useMyProfile now strictly gates on `!isInitializing && !!identity && !!actor && !isActorFetching` to prevent any false 'no profile' result during startup, and useCreatePoopEntry no longer incorrectly invalidates the profile query.",
-  "frontend/src/components/Leaderboard.tsx": "Displays King Pooper, King Wiper, and The Efficient Wiper leaders with profile previews and badges. MVP recognition is awarded only when the same user holds both King Pooper and King Wiper titles; The Efficient Wiper is a standalone badge that does not influence MVP status.",
-  "frontend/src/components/AllTimeStandings.tsx": "Comprehensive rankings table showing all users sorted by poops and wipes with detailed lifetime statistics, including visual indicators for King Pooper, King Wiper, and The Efficient Wiper titles.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations — useMyProfile uses standard enabled guard (actor ready + identity present), useCreatePoopEntry invalidates rankedUserStats only, useRankedUserStats fetches all user stats.",
+  "frontend/src/components/Leaderboard.tsx": "Displays King Pooper and King Wiper leaders with profile previews and badges in a 2-column grid; MVP recognition is awarded when the same user holds both titles. No Efficient Wiper badge.",
+  "frontend/src/components/AllTimeStandings.tsx": "Comprehensive rankings table showing all users sorted by poops and wipes with columns for display name/emoji, total poops, total wipes, TP rolls, and avg wipes per poop; highlights King Pooper and King Wiper with inline badges. No Efficient Wiper logic.",
   "frontend/src/components/LeaderboardToggle.tsx": "Toggle switch component with Lifetime and Daily buttons that allows users to switch between leaderboard view modes with visual prominence and clear labeling."
 }
