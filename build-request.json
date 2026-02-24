@@ -1,79 +1,166 @@
 {
   "kind": "build_request",
-  "title": "Fix profile detection so existing users skip profile creation on startup",
+  "title": "Rebuild app from scratch — core features only: login, profiles, unified dashboard with Lifetime/Daily toggle",
   "projectName": "Poop Tracker",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-32",
-      "text": "Rewrite the useProfile hook in useQueries.ts using a manual async approach: use a plain React useState + useEffect (or useQuery with enabled guard) so the backend getProfile call is only fired after the actor is confirmed non-null. The hook must remain in a 'loading' state (isLoading: true, data: undefined) while the actor is undefined or null, and only transition to a settled state (isLoading: false) after the async call has fully resolved. It must never return a null/empty profile result before the backend call has actually completed.",
-      "target": "frontend",
+      "id": "REQ-35",
+      "text": "Rewrite the Motoko backend (backend/main.mo) from scratch with a clean, minimal implementation supporting: (1) user profile registration and retrieval keyed by principal (displayName, emoji, color, background), (2) logging a poop entry with wipe count and auto-timestamp, (3) retrieving all entries for the authenticated principal, (4) retrieving ranked stats for all users (total poops, total wipes) for both lifetime and daily (today) scopes. Remove any dead or unused functions.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-8"
         ],
         "quotes": [
-          "it keeps redirecting to profile creation screen when it starts. and its stuck there. I already have a profile so I want it to recognize that"
+          "simply the entire code in this app to bring it back to the features that we first started",
+          "keep the login and user profiles and yes one dashboard with the toggle feature"
         ]
       },
       "acceptanceCriteria": [
-        "The useProfile hook does not fire any backend call when the actor is undefined or null",
-        "The hook stays in isLoading=true state until the actor is ready AND the backend call has resolved",
-        "The hook only returns a 'no profile' result (null/empty data, isLoading=false) after the backend explicitly responds with no profile",
-        "The hook returns the profile data correctly when the backend responds with an existing profile"
+        "registerProfile stores and retrieves a profile by caller principal",
+        "getProfile returns the caller's profile or null if none exists",
+        "logPoop records a poop entry with wipe count and a nanosecond timestamp",
+        "getRankedStats returns total poops and total wipes per user for all-time",
+        "getDailyStats returns today's poops and total wipes per user filtered to the current UTC day",
+        "Backend compiles and deploys without errors"
       ]
     },
     {
-      "id": "REQ-33",
-      "text": "Rewrite the routing/profile-detection logic in App.tsx using a simple two-phase approach: Phase 1 — show a full-screen loading spinner while the actor is not yet initialized OR while the profile query has not yet settled (isLoading is true). Phase 2 — once the query has settled, if a profile exists navigate to the Dashboard; if no profile exists navigate to ProfileSetup. Do NOT use a tri-state enum pattern. Do NOT make any routing decision (render ProfileSetup or Dashboard) until both conditions are true: actor is non-null AND isLoading is false.",
+      "id": "REQ-36",
+      "text": "Rewrite App.tsx from scratch with simple, reliable two-phase routing: (1) while the actor is null OR the profile query is still loading, show a full-screen centered loading spinner with the text 'Loading your profile…'; (2) once both the actor is initialized AND the profile query has settled, route to LoginPage if not authenticated, ProfileSetup if authenticated but no profile exists, or Dashboard if authenticated and a profile exists. Do not use tri-state enums. Do not render ProfileSetup or Dashboard until the profile query has fully resolved.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-8"
         ],
         "quotes": [
-          "it keeps redirecting to profile creation screen when it starts. and its stuck there. I already have a profile so I want it to recognize that"
+          "simply the entire code",
+          "keep the login and user profiles"
         ]
       },
       "acceptanceCriteria": [
-        "App shows a loading spinner on startup until the actor is ready and the profile query resolves",
-        "If the user already has a profile, the app navigates directly to the Dashboard without ever rendering ProfileSetup",
-        "If the user genuinely has no profile, the app navigates to ProfileSetup after the query confirms no profile exists",
-        "App never routes to ProfileSetup prematurely (i.e., before the backend call completes)",
-        "The app does not get stuck on a loading screen indefinitely — once the actor is ready and the query resolves, it always transitions to one of the two states"
+        "A loading spinner is shown while identity or profile data is resolving",
+        "Unauthenticated users see LoginPage",
+        "Authenticated users with an existing profile go directly to Dashboard without hitting ProfileSetup",
+        "Authenticated users with no profile are routed to ProfileSetup",
+        "No routing decision is made until both actor is non-null and isLoading is false"
       ]
     },
     {
-      "id": "REQ-34",
-      "text": "Add a safety timeout to the profile loading sequence in App.tsx: if after 10 seconds the actor is still not initialized or the profile query has not resolved, treat the state as 'no profile' and allow the user to proceed to ProfileSetup rather than staying stuck indefinitely. Display a user-friendly message in the loading state such as 'Loading your profile…'.",
+      "id": "REQ-37",
+      "text": "Rewrite the useProfile hook in useQueries.ts using useQuery with an enabled guard: the backend getProfile call must only fire when the actor is confirmed non-null. The hook must return isLoading: true while the actor is undefined/null or while the query is in flight, and only return a settled result (profile or null) after the async call has fully completed.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-8"
         ],
         "quotes": [
-          "its stuck there"
+          "simply the entire code"
         ]
       },
       "acceptanceCriteria": [
-        "App never stays stuck on the loading screen indefinitely",
-        "After 10 seconds without resolution, app falls through to ProfileSetup",
-        "Loading screen shows a readable message like 'Loading your profile…'"
+        "useProfile does not fire the backend call when actor is undefined or null",
+        "isLoading remains true until the backend call has fully resolved",
+        "A null/empty result is only returned after a confirmed backend response, not prematurely",
+        "Hook works correctly on first login and on page refresh for existing users"
+      ]
+    },
+    {
+      "id": "REQ-38",
+      "text": "Rewrite the Dashboard page (frontend/src/pages/Dashboard.tsx) as a single unified page with: (1) a Lifetime/Daily toggle at the top, (2) a personal stats card showing the logged-in user's total poops and total wipes (lifetime or today depending on toggle), (3) a 'Log a Poop' button that navigates to the log flow, (4) a leaderboard/standings section showing all users ranked by total poops with columns for display name/emoji, total poops, total wipes — filtered by the selected toggle mode. Remove all Efficient Wiper references. Remove separate Leaderboard and AllTimeStandings components if they cause complexity; inline the logic cleanly.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-8"
+        ],
+        "quotes": [
+          "one dashboard with the toggle feature",
+          "log poops and wipes and a simple dashboard for lifetime and daily trackin"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Dashboard has a clearly visible Lifetime/Daily toggle",
+        "Personal stats card updates when toggle is switched",
+        "Leaderboard/standings table updates when toggle is switched",
+        "King Pooper (most poops) and King Wiper (most wipes) badges are shown, with MVP badge if one user holds both",
+        "No Efficient Wiper badge or highlighting anywhere",
+        "Log a Poop button is present and functional",
+        "Page renders without errors for both authenticated users with and without entries"
+      ]
+    },
+    {
+      "id": "REQ-39",
+      "text": "Keep the ProfileSetup page (frontend/src/pages/ProfileSetup.tsx) intact and functional: allow users to set a display name, choose from preset emojis, pick a color and background, preview their profile, and submit the profile to the backend. Ensure emojis are properly centered in their selection boxes on mobile.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-8"
+        ],
+        "quotes": [
+          "keep the login and user profiles"
+        ]
+      },
+      "acceptanceCriteria": [
+        "User can enter a display name",
+        "User can select an emoji, color, and background from presets",
+        "A live preview of the profile avatar is shown",
+        "Submitting the form calls registerProfile on the backend",
+        "On successful registration, user is routed to Dashboard",
+        "Emojis are centered in their selection boxes on mobile screens"
+      ]
+    },
+    {
+      "id": "REQ-40",
+      "text": "Keep the LogPoop page (frontend/src/pages/LogPoop.tsx) intact: a simple multi-step flow where the user confirms they want to log a poop, enters the number of wipes, and sees a success screen. The entry is submitted to the backend with a timestamp.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-8"
+        ],
+        "quotes": [
+          "log poops and wipes"
+        ]
+      },
+      "acceptanceCriteria": [
+        "User can initiate logging a poop from the Dashboard",
+        "User is prompted to enter number of wipes",
+        "On submission, logPoop is called on the backend with wipe count",
+        "A success confirmation screen is shown after logging",
+        "User can navigate back to Dashboard after logging"
+      ]
+    },
+    {
+      "id": "REQ-41",
+      "text": "Keep the LoginPage (frontend/src/pages/LoginPage.tsx) intact with the Internet Identity login button and playful branding. No functional changes needed.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-8"
+        ],
+        "quotes": [
+          "keep the login and user profiles"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Login page displays with Internet Identity login button",
+        "Clicking login triggers the Internet Identity authentication flow",
+        "After successful login, user is routed through the profile detection logic in App.tsx"
       ]
     }
   ],
   "constraints": [
-    "Do not change any backend Motoko code",
-    "Do not modify files under frontend/src/hooks/useActor.ts, frontend/src/hooks/useInternetIdentity.ts, or frontend/src/main.tsx",
-    "Do not introduce a tri-state enum pattern ('loading'/'has-profile'/'no-profile') that previously caused the app to get stuck indefinitely",
-    "Do not break the existing Leaderboard, AllTimeStandings, or other components — only change App.tsx and useQueries.ts"
+    "Do not add The Efficient Wiper badge or any reference to it anywhere in the codebase",
+    "Do not use a tri-state enum pattern in App.tsx — use simple two-phase loading logic only",
+    "Do not modify files in frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "All Motoko logic must remain in backend/main.mo as a single actor"
   ],
   "nonGoals": [
-    "Adding new features or pages",
-    "Changing the profile creation form or its fields",
-    "Modifying the leaderboard or standings components",
-    "Changing authentication flow or Internet Identity integration",
-    "Any backend schema changes"
+    "No separate Leaderboard page — all stats live on one unified Dashboard",
+    "No Efficient Wiper badge or standings highlighting",
+    "No tri-state profile routing logic",
+    "No external databases or third-party services",
+    "No real-time updates or WebSockets"
   ],
   "imageRequirements": {
     "required": [],

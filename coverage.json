@@ -1,29 +1,25 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T19:11:55.479Z",
+  "generatedAt": "2026-02-24T19:47:28.077Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 7,
+    "implemented": 5,
     "items": [
       {
-        "id": "REQ-32",
-        "summary": "Rewrite the useProfile hook in useQueries.ts using a manual async approach: use a plain React useState + useEffect (or useQuery with enabled guard) so the backend getProfile call is only fired after the actor is confirmed non-null. The hook must remain in a 'loading' state (isLoading: true, data: undefined) while the actor is undefined or null, and only transition to a settled state (isLoading: false) after the async call has fully resolved. It must never return a null/empty profile result before the backend call has actually completed.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
-        ]
+        "id": "REQ-35",
+        "summary": "Rewrite the Motoko backend (backend/main.mo) from scratch with a clean, minimal implementation supporting: (1) user profile registration and retrieval keyed by principal (displayName, emoji, color, background), (2) logging a poop entry with wipe count and auto-timestamp, (3) retrieving all entries for the authenticated principal, (4) retrieving ranked stats for all users (total poops, total wipes) for both lifetime and daily (today) scopes. Remove any dead or unused functions.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
-        "id": "REQ-33",
-        "summary": "Rewrite the routing/profile-detection logic in App.tsx using a simple two-phase approach: Phase 1 — show a full-screen loading spinner while the actor is not yet initialized OR while the profile query has not yet settled (isLoading is true). Phase 2 — once the query has settled, if a profile exists navigate to the Dashboard; if no profile exists navigate to ProfileSetup. Do NOT use a tri-state enum pattern. Do NOT make any routing decision (render ProfileSetup or Dashboard) until both conditions are true: actor is non-null AND isLoading is false.",
+        "id": "REQ-36",
+        "summary": "Rewrite App.tsx from scratch with simple, reliable two-phase routing: (1) while the actor is null OR the profile query is still loading, show a full-screen centered loading spinner with the text 'Loading your profile…'; (2) once both the actor is initialized AND the profile query has settled, route to LoginPage if not authenticated, ProfileSetup if authenticated but no profile exists, or Dashboard if authenticated and a profile exists. Do not use tri-state enums. Do not render ProfileSetup or Dashboard until the profile query has fully resolved.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/App.tsx"
@@ -33,25 +29,88 @@
         ]
       },
       {
-        "id": "REQ-34",
-        "summary": "Add a safety timeout to the profile loading sequence in App.tsx: if after 10 seconds the actor is still not initialized or the profile query has not resolved, treat the state as 'no profile' and allow the user to proceed to ProfileSetup rather than staying stuck indefinitely. Display a user-friendly message in the loading state such as 'Loading your profile…'.",
+        "id": "REQ-37",
+        "summary": "Rewrite the useProfile hook in useQueries.ts using useQuery with an enabled guard: the backend getProfile call must only fire when the actor is confirmed non-null. The hook must return isLoading: true while the actor is undefined/null or while the query is in flight, and only return a settled result (profile or null) after the async call has fully completed.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx"
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx"
+          "frontend/src/hooks/useQueries.ts"
         ]
+      },
+      {
+        "id": "REQ-38",
+        "summary": "Rewrite the Dashboard page (frontend/src/pages/Dashboard.tsx) as a single unified page with: (1) a Lifetime/Daily toggle at the top, (2) a personal stats card showing the logged-in user's total poops and total wipes (lifetime or today depending on toggle), (3) a 'Log a Poop' button that navigates to the log flow, (4) a leaderboard/standings section showing all users ranked by total poops with columns for display name/emoji, total poops, total wipes — filtered by the selected toggle mode. Remove all Efficient Wiper references. Remove separate Leaderboard and AllTimeStandings components if they cause complexity; inline the logic cleanly.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/components/Leaderboard.tsx",
+          "frontend/src/components/AllTimeStandings.tsx",
+          "frontend/src/components/LeaderboardToggle.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/components/Leaderboard.tsx",
+          "frontend/src/components/AllTimeStandings.tsx"
+        ]
+      },
+      {
+        "id": "REQ-39",
+        "summary": "Keep the ProfileSetup page (frontend/src/pages/ProfileSetup.tsx) intact and functional: allow users to set a display name, choose from preset emojis, pick a color and background, preview their profile, and submit the profile to the backend. Ensure emojis are properly centered in their selection boxes on mobile.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/ProfileSetup.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/ProfileSetup.tsx"
+        ]
+      },
+      {
+        "id": "REQ-40",
+        "summary": "Keep the LogPoop page (frontend/src/pages/LogPoop.tsx) intact: a simple multi-step flow where the user confirms they want to log a poop, enters the number of wipes, and sees a success screen. The entry is submitted to the backend with a timestamp.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/LogPoop.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/LogPoop.tsx"
+        ]
+      },
+      {
+        "id": "REQ-41",
+        "summary": "Keep the LoginPage (frontend/src/pages/LoginPage.tsx) intact with the Internet Identity login button and playful branding. No functional changes needed.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/pages/LoginPage.tsx"
+        ],
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
+    "backend/authorization/MixinAuthorization.mo",
+    "backend/authorization/access-control.mo",
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
+    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/App.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/AllTimeStandings.tsx",
+    "frontend/src/components/Leaderboard.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useActor.ts",
     "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/pages/LogPoop.tsx",
+    "frontend/src/pages/ProfileSetup.tsx",
+    "frontend/src/utils/urlParams.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

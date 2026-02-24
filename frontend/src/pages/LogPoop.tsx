@@ -24,7 +24,7 @@ export default function LogPoop() {
     },
     onSuccess: () => {
       setStep('success');
-      queryClient.invalidateQueries({ queryKey: ['myProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['rankedUserStats'] });
       toast.success('Poop logged successfully! 🎉');
     },
     onError: (error) => {

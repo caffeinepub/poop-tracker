@@ -10,12 +10,6 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface DailyStats {
-  'totalToiletPaperRolls' : bigint,
-  'avgWipesPerPoop' : number,
-  'totalPoops' : bigint,
-  'totalWipes' : bigint,
-}
 export interface Entry { 'numberOfWipes' : bigint, 'timestamp' : Time }
 export interface Profile {
   'background' : string,
@@ -24,21 +18,33 @@ export interface Profile {
   'emoji' : string,
 }
 export type Time = bigint;
+export type UserRole = { 'admin' : null } |
+  { 'user' : null } |
+  { 'guest' : null };
 export interface UserStats {
   'principal' : Principal,
   'entries' : Array<Entry>,
   'totalToiletPaperRolls' : bigint,
-  'avgWipesPerPoop' : bigint,
+  'avgWipesPerPoop' : number,
   'totalPoops' : bigint,
   'totalWipes' : bigint,
   'profile' : Profile,
 }
 export interface _SERVICE {
+  '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createPoopEntry' : ActorMethod<[bigint], undefined>,
-  'getDailyStats' : ActorMethod<[], DailyStats>,
-  'getMyProfile' : ActorMethod<[], Profile>,
-  'getRankedUserStats' : ActorMethod<[], Array<UserStats>>,
+  'getCallerUserProfile' : ActorMethod<[], [] | [Profile]>,
+  'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getMyEntries' : ActorMethod<[], Array<Entry>>,
+  'getRankedUserStats' : ActorMethod<
+    [],
+    { 'today' : Array<UserStats>, 'allTime' : Array<UserStats> }
+  >,
+  'getUserProfile' : ActorMethod<[Principal], [] | [Profile]>,
+  'isCallerAdmin' : ActorMethod<[], boolean>,
   'register' : ActorMethod<[Profile], undefined>,
+  'saveCallerUserProfile' : ActorMethod<[Profile], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

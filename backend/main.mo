@@ -1,19 +1,17 @@
 import Map "mo:core/Map";
 import List "mo:core/List";
-import Text "mo:core/Text";
-import Principal "mo:core/Principal";
 import Nat "mo:core/Nat";
-import Int "mo:core/Int";
-import Iter "mo:core/Iter";
+import Principal "mo:core/Principal";
+import Time "mo:core/Time";
 import Runtime "mo:core/Runtime";
 import Nat64 "mo:core/Nat64";
-import Time "mo:core/Time";
-import Nat32 "mo:core/Nat32";
-import Array "mo:core/Array";
+import MixinAuthorization "authorization/MixinAuthorization";
+import AccessControl "authorization/access-control";
+import Migration "migration";
 
-
-
+(with migration = Migration.run)
 actor {
+  // Types
   type Profile = {
     displayName : Text;
     emoji : Text;
@@ -26,144 +24,168 @@ actor {
     numberOfWipes : Nat;
   };
 
-  module Entry {
-    public func compare(a : Entry, b : Entry) : { #less; #equal; #greater } {
-      Int.compare(a.timestamp, b.timestamp);
-    };
-  };
-
   type UserStats = {
     principal : Principal;
     profile : Profile;
     totalPoops : Nat;
-    totalWipes : Nat64;
-    totalToiletPaperRolls : Nat;
-    avgWipesPerPoop : Nat64;
-    entries : [Entry];
-  };
-
-  type UserData = {
-    profile : Profile;
-    entries : [Entry];
-  };
-
-  type DailyStats = {
-    totalPoops : Nat;
     totalWipes : Nat;
     totalToiletPaperRolls : Nat;
     avgWipesPerPoop : Float;
+    entries : [Entry];
   };
 
-  let users = Map.empty<Principal, UserData>();
+  // Authorization
+  let accessControlState = AccessControl.initState();
+  include MixinAuthorization(accessControlState);
 
-  public shared ({ caller }) func register(profile : Profile) : async () {
-    if (users.containsKey(caller)) { Runtime.trap("User is already registered") };
-    let initialData : UserData = {
-      profile;
-      entries = [];
+  // Persistent user state
+  let state = Map.empty<Principal, { profile : Profile; entries : List.List<Entry> }>();
+
+  // --- Required profile functions for frontend ---
+
+  // Get current user's profile (required by frontend)
+  public query ({ caller }) func getCallerUserProfile() : async ?Profile {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can get their profile");
     };
-    users.add(caller, initialData);
+    switch (state.get(caller)) {
+      case (null) { null };
+      case (?userData) { ?userData.profile };
+    };
   };
 
+  // Save current user's profile (required by frontend)
+  public shared ({ caller }) func saveCallerUserProfile(profile : Profile) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save their profile");
+    };
+    switch (state.get(caller)) {
+      case (null) {
+        let initialEntries = List.empty<Entry>();
+        state.add(caller, { profile; entries = initialEntries });
+      };
+      case (?userData) {
+        state.add(caller, { profile; entries = userData.entries });
+      };
+    };
+  };
+
+  // Get another user's profile (required by frontend)
+  public query ({ caller }) func getUserProfile(user : Principal) : async ?Profile {
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own profile");
+    };
+    switch (state.get(user)) {
+      case (null) { null };
+      case (?userData) { ?userData.profile };
+    };
+  };
+
+  // --- Application-specific functions ---
+
+  // Register new user if not already registered
+  public shared ({ caller }) func register(profile : Profile) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can register");
+    };
+    if (state.containsKey(caller)) {
+      Runtime.trap("User is already registered");
+    };
+    let initialEntries = List.empty<Entry>();
+    state.add(caller, { profile; entries = initialEntries });
+  };
+
+  // Add Poop Entry
   public shared ({ caller }) func createPoopEntry(numberOfWipes : Nat) : async () {
-    switch (users.get(caller)) {
-      case (null) { Runtime.trap("Cannot create poop entry. User is not registered.") };
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can create poop entries");
+    };
+    switch (state.get(caller)) {
+      case (null) { Runtime.trap("Cannot create poop entry: User is not registered.") };
       case (?userData) {
         let newEntry : Entry = {
           timestamp = Time.now();
           numberOfWipes;
         };
-        let updatedEntries = userData.entries.concat([newEntry]);
-        let updatedData : UserData = {
-          profile = userData.profile;
-          entries = updatedEntries;
-        };
-        users.add(caller, updatedData);
+        userData.entries.add(newEntry);
+        state.add(caller, { profile = userData.profile; entries = userData.entries });
       };
     };
   };
 
-  public query ({ caller }) func getMyProfile() : async Profile {
-    switch (users.get(caller)) {
-      case (null) { Runtime.trap("Cannot get profile. User is not registered.") };
-      case (?userData) { userData.profile };
+  // Get all entries for current user
+  public query ({ caller }) func getMyEntries() : async [Entry] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can get their entries");
+    };
+    switch (state.get(caller)) {
+      case (null) { Runtime.trap("Cannot get entries: User is not registered.") };
+      case (?userData) { userData.entries.toArray() };
     };
   };
 
-  public query ({ caller }) func getRankedUserStats() : async [UserStats] {
-    let statsList = List.empty<UserStats>();
+  // Get ranked user stats (all time and daily) - public, no auth required
+  public query func getRankedUserStats() : async {
+    allTime : [UserStats];
+    today : [UserStats];
+  } {
+    let now = Time.now();
+    let todayMidnight = (now / 86_400_000_000_000) * 86_400_000_000_000;
 
-    for ((principal, userData) in users.entries()) {
-      let totalPoops = userData.entries.size();
-      var totalWipes : Nat64 = 0;
+    var allTimeList : List.List<UserStats> = List.empty<UserStats>();
+    var dailyList : List.List<UserStats> = List.empty<UserStats>();
 
-      for (entry in userData.entries.values()) {
-        totalWipes += Nat64.fromNat(entry.numberOfWipes);
+    for ((principal, userData) in state.entries()) {
+      let entriesArray = userData.entries.toArray();
+      let totalPoops = entriesArray.size();
+      var totalWipes = 0;
+
+      for (entry in entriesArray.vals()) {
+        totalWipes += entry.numberOfWipes;
       };
+
       let totalRolls = totalWipes / 10;
-      let avgWipesPerPoop : Nat64 = if (totalPoops > 0) {
-        totalWipes / Nat64.fromNat(totalPoops);
-      } else { 0 };
-      statsList.add({
+      let avgWipesPerPoop : Float = if (totalPoops > 0) {
+        totalWipes.toFloat() / totalPoops.toFloat();
+      } else { 0.0 };
+
+      allTimeList.add({
         principal;
         profile = userData.profile;
         totalPoops;
         totalWipes;
-        totalToiletPaperRolls = totalRolls.toNat();
+        totalToiletPaperRolls = totalRolls;
         avgWipesPerPoop;
-        entries = userData.entries;
+        entries = entriesArray;
+      });
+
+      // Daily stats
+      let dailyEntries = entriesArray.filter(func(entry) { entry.timestamp >= todayMidnight });
+      let dailyPoops = dailyEntries.size();
+      var dailyWipes = 0;
+      for (entry in dailyEntries.vals()) {
+        dailyWipes += entry.numberOfWipes;
+      };
+
+      let dailyRolls = dailyWipes / 10;
+      let dailyAvgWipes : Float = if (dailyPoops > 0) {
+        dailyWipes.toFloat() / dailyPoops.toFloat();
+      } else { 0.0 };
+
+      dailyList.add({
+        principal;
+        profile = userData.profile;
+        totalPoops = dailyPoops;
+        totalWipes = dailyWipes;
+        totalToiletPaperRolls = dailyRolls;
+        avgWipesPerPoop = dailyAvgWipes;
+        entries = dailyEntries;
       });
     };
 
-    statsList.toArray();
-  };
-
-  public query ({ caller }) func getDailyStats() : async DailyStats {
-    let now = Time.now();
-    let todayMidnight = (now / 86400000000000) * 86400000000000;
-    let _tomorrowMidnight = todayMidnight + 86400000000000;
-
-    let startOfDay = todayMidnight;
-    let timeRange = 86400000000000;
-
-    calculateDailyStats(startOfDay, timeRange);
-  };
-
-  func calculateDailyStats(startOfDay : Time.Time, timeRangeMicros : Int) : DailyStats {
-    let entriesToday = getEntriesInTimeRange(startOfDay, timeRangeMicros);
-
-    let totalPoops = entriesToday.size();
-    let totalWipes = entriesToday.foldLeft(
-      0,
-      func(acc, entry) { acc + entry.numberOfWipes },
-    );
-    let totalRolls = totalWipes / 10;
-    let avgWipesPerPoop : Float = if (totalPoops > 0) {
-      totalWipes.toFloat() / totalPoops.toFloat();
-    } else { 0 };
-
     {
-      totalPoops;
-      totalWipes;
-      totalToiletPaperRolls = totalRolls;
-      avgWipesPerPoop;
+      allTime = allTimeList.toArray();
+      today = dailyList.toArray();
     };
-  };
-
-  func getEntriesInTimeRange(startTime : Int, timeRangeMicros : Int) : List.List<Entry> {
-    let entriesToday = List.empty<Entry>();
-
-    for ((_, userData) in users.entries()) {
-      for (entry in userData.entries.values()) {
-        let timestamp = entry.timestamp;
-        let timestampMicros = Int.abs(timestamp);
-        if (
-          timestampMicros >= Int.abs(startTime) and timestampMicros < Int.abs(startTime) + Int.abs(timeRangeMicros)
-        ) {
-          entriesToday.add(entry);
-        };
-      };
-    };
-    entriesToday;
   };
 };

@@ -8,11 +8,10 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
-export const DailyStats = IDL.Record({
-  'totalToiletPaperRolls' : IDL.Nat,
-  'avgWipesPerPoop' : IDL.Float64,
-  'totalPoops' : IDL.Nat,
-  'totalWipes' : IDL.Nat,
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
 });
 export const Profile = IDL.Record({
   'background' : IDL.Text,
@@ -29,28 +28,42 @@ export const UserStats = IDL.Record({
   'principal' : IDL.Principal,
   'entries' : IDL.Vec(Entry),
   'totalToiletPaperRolls' : IDL.Nat,
-  'avgWipesPerPoop' : IDL.Nat64,
+  'avgWipesPerPoop' : IDL.Float64,
   'totalPoops' : IDL.Nat,
-  'totalWipes' : IDL.Nat64,
+  'totalWipes' : IDL.Nat,
   'profile' : Profile,
 });
 
 export const idlService = IDL.Service({
+  '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'createPoopEntry' : IDL.Func([IDL.Nat], [], []),
-  'getDailyStats' : IDL.Func([], [DailyStats], ['query']),
-  'getMyProfile' : IDL.Func([], [Profile], ['query']),
-  'getRankedUserStats' : IDL.Func([], [IDL.Vec(UserStats)], ['query']),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(Profile)], ['query']),
+  'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getMyEntries' : IDL.Func([], [IDL.Vec(Entry)], ['query']),
+  'getRankedUserStats' : IDL.Func(
+      [],
+      [
+        IDL.Record({
+          'today' : IDL.Vec(UserStats),
+          'allTime' : IDL.Vec(UserStats),
+        }),
+      ],
+      ['query'],
+    ),
+  'getUserProfile' : IDL.Func([IDL.Principal], [IDL.Opt(Profile)], ['query']),
+  'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'register' : IDL.Func([Profile], [], []),
+  'saveCallerUserProfile' : IDL.Func([Profile], [], []),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
-  const DailyStats = IDL.Record({
-    'totalToiletPaperRolls' : IDL.Nat,
-    'avgWipesPerPoop' : IDL.Float64,
-    'totalPoops' : IDL.Nat,
-    'totalWipes' : IDL.Nat,
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
   });
   const Profile = IDL.Record({
     'background' : IDL.Text,
@@ -64,18 +77,33 @@ export const idlFactory = ({ IDL }) => {
     'principal' : IDL.Principal,
     'entries' : IDL.Vec(Entry),
     'totalToiletPaperRolls' : IDL.Nat,
-    'avgWipesPerPoop' : IDL.Nat64,
+    'avgWipesPerPoop' : IDL.Float64,
     'totalPoops' : IDL.Nat,
-    'totalWipes' : IDL.Nat64,
+    'totalWipes' : IDL.Nat,
     'profile' : Profile,
   });
   
   return IDL.Service({
+    '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'createPoopEntry' : IDL.Func([IDL.Nat], [], []),
-    'getDailyStats' : IDL.Func([], [DailyStats], ['query']),
-    'getMyProfile' : IDL.Func([], [Profile], ['query']),
-    'getRankedUserStats' : IDL.Func([], [IDL.Vec(UserStats)], ['query']),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(Profile)], ['query']),
+    'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getMyEntries' : IDL.Func([], [IDL.Vec(Entry)], ['query']),
+    'getRankedUserStats' : IDL.Func(
+        [],
+        [
+          IDL.Record({
+            'today' : IDL.Vec(UserStats),
+            'allTime' : IDL.Vec(UserStats),
+          }),
+        ],
+        ['query'],
+      ),
+    'getUserProfile' : IDL.Func([IDL.Principal], [IDL.Opt(Profile)], ['query']),
+    'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'register' : IDL.Func([Profile], [], []),
+    'saveCallerUserProfile' : IDL.Func([Profile], [], []),
   });
 };
 

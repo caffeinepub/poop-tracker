@@ -1,56 +1,128 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix profile detection so existing users skip profile creation on startup",
+  "title": "Rebuild Poop Tracker frontend — core features only: login, profiles, unified dashboard with Lifetime/Daily toggle",
   "requirements": [
     {
-      "id": "REQ-32",
-      "summary": "Rewrite useProfile hook to prevent premature profile queries and ensure proper loading state management",
+      "id": "REQ-36",
+      "summary": "Rewrite App.tsx with simple two-phase routing: show loading spinner until actor and profile query settle, then route to LoginPage if unauthenticated, ProfileSetup if no profile, or Dashboard if profile exists",
       "acceptanceCriteria": [
-        "The useProfile hook does not fire any backend call when the actor is undefined or null",
-        "The hook stays in isLoading=true state until the actor is ready AND the backend call has resolved",
-        "The hook only returns a 'no profile' result (null/empty data, isLoading=false) after the backend explicitly responds with no profile",
-        "The hook returns the profile data correctly when the backend responds with an existing profile"
+        "A loading spinner is shown while identity or profile data is resolving",
+        "Unauthenticated users see LoginPage",
+        "Authenticated users with an existing profile go directly to Dashboard without hitting ProfileSetup",
+        "Authenticated users with no profile are routed to ProfileSetup",
+        "No routing decision is made until both actor is non-null and isLoading is false"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Rewrite the routing logic to implement simple two-phase loading: (1) show a full-screen centered loading spinner with 'Loading your profile…' while actor is null OR profile query is loading; (2) once both actor is initialized AND profile query has settled (isLoading false), route based on authentication and profile state: LoginPage if not authenticated, ProfileSetup if authenticated but profile is null, Dashboard if authenticated and profile exists. Remove any tri-state enum patterns and the 10-second timeout logic. Ensure ProfileSetup and Dashboard are not rendered until the profile query has fully resolved."
+        }
+      ]
+    },
+    {
+      "id": "REQ-37",
+      "summary": "Rewrite useProfile hook in useQueries.ts to only fire backend getCallerUserProfile when actor is non-null, returning isLoading true until fully resolved",
+      "acceptanceCriteria": [
+        "useProfile does not fire the backend call when actor is undefined or null",
+        "isLoading remains true until the backend call has fully resolved",
+        "A null/empty result is only returned after a confirmed backend response, not prematurely",
+        "Hook works correctly on first login and on page refresh for existing users"
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Rewrite the useProfile hook using a manual async approach with useState + useEffect (or useQuery with enabled guard). Ensure the hook fires the getMyProfile backend call only after the actor is confirmed non-null. Keep the hook in a loading state (isLoading: true, data: undefined) while the actor is undefined or null, and only transition to a settled state (isLoading: false) after the async call has fully resolved. Never return a null/empty profile result before the backend call has actually completed."
+          "description": "Rewrite the useProfile hook (or create useGetCallerUserProfile if it doesn't exist) using useQuery with an enabled guard: only call actor.getCallerUserProfile() when actor is confirmed non-null. Return isLoading: true while actor is undefined/null OR while the query is in flight. Only return a settled result (profile or null) after the async call has fully completed. Ensure isFetched is true only when the backend has responded."
         }
       ]
     },
     {
-      "id": "REQ-33",
-      "summary": "Rewrite App.tsx routing logic to use a two-phase approach that waits for both actor initialization and profile query resolution",
+      "id": "REQ-38",
+      "summary": "Rewrite Dashboard page as a single unified page with Lifetime/Daily toggle, personal stats card, Log a Poop button, and leaderboard/standings showing all users ranked by total poops; remove all Efficient Wiper references and separate Leaderboard/AllTimeStandings components",
       "acceptanceCriteria": [
-        "App shows a loading spinner on startup until the actor is ready and the profile query resolves",
-        "If the user already has a profile, the app navigates directly to the Dashboard without ever rendering ProfileSetup",
-        "If the user genuinely has no profile, the app navigates to ProfileSetup after the query confirms no profile exists",
-        "App never routes to ProfileSetup prematurely (i.e., before the backend call completes)",
-        "The app does not get stuck on a loading screen indefinitely — once the actor is ready and the query resolves, it always transitions to one of the two states"
+        "Dashboard has a clearly visible Lifetime/Daily toggle",
+        "Personal stats card updates when toggle is switched",
+        "Leaderboard/standings table updates when toggle is switched",
+        "King Pooper (most poops) and King Wiper (most wipes) badges are shown, with MVP badge if one user holds both",
+        "No Efficient Wiper badge or highlighting anywhere",
+        "Log a Poop button is present and functional",
+        "Page renders without errors for both authenticated users with and without entries"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/pages/Dashboard.tsx",
           "operation": "modify",
-          "description": "Rewrite the routing/profile-detection logic using a simple two-phase approach: Phase 1 — show a full-screen loading spinner while the actor is not yet initialized OR while the profile query has not yet settled (isLoading is true). Phase 2 — once the query has settled, if a profile exists navigate to the Dashboard; if no profile exists navigate to ProfileSetup. Do NOT use a tri-state enum pattern. Do NOT make any routing decision (render ProfileSetup or Dashboard) until both conditions are true: actor is non-null AND isLoading is false."
+          "description": "Rewrite the Dashboard page from scratch with: (1) a Lifetime/Daily toggle button at the top, (2) a personal stats card displaying the logged-in user's total poops and total wipes (filtered by toggle mode), (3) a 'Log a Poop' button that navigates to /log, (4) a unified leaderboard/standings section showing all users ranked by total poops with columns for display name/emoji (using ProfilePreview), total poops, total wipes. Use useRankedStats query hook to fetch both allTime and today data from backend.getRankedUserStats(), and switch between them based on toggle state. Display King Pooper badge for most poops, King Wiper badge for most wipes, and MVP badge if one user holds both titles. Remove all references to Efficient Wiper. Inline the leaderboard logic cleanly; do not reference separate Leaderboard or AllTimeStandings components."
+        },
+        {
+          "path": "frontend/src/components/Leaderboard.tsx",
+          "operation": "delete",
+          "description": "Remove the separate Leaderboard component as its logic is now inlined in the unified Dashboard page."
+        },
+        {
+          "path": "frontend/src/components/AllTimeStandings.tsx",
+          "operation": "delete",
+          "description": "Remove the separate AllTimeStandings component as its logic is now inlined in the unified Dashboard page."
+        },
+        {
+          "path": "frontend/src/components/LeaderboardToggle.tsx",
+          "operation": "delete",
+          "description": "Remove the empty LeaderboardToggle component file."
         }
       ]
     },
     {
-      "id": "REQ-34",
-      "summary": "Add a 10-second safety timeout to prevent indefinite loading and display a user-friendly loading message",
+      "id": "REQ-39",
+      "summary": "Keep ProfileSetup page intact and functional: allow users to set display name, choose emoji/color/background, preview profile, and submit to backend; ensure emojis are centered on mobile",
       "acceptanceCriteria": [
-        "App never stays stuck on the loading screen indefinitely",
-        "After 10 seconds without resolution, app falls through to ProfileSetup",
-        "Loading screen shows a readable message like 'Loading your profile…'"
+        "User can enter a display name",
+        "User can select an emoji, color, and background from presets",
+        "A live preview of the profile avatar is shown",
+        "Submitting the form calls registerProfile on the backend",
+        "On successful registration, user is routed to Dashboard",
+        "Emojis are centered in their selection boxes on mobile screens"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/pages/ProfileSetup.tsx",
           "operation": "modify",
-          "description": "Add a safety timeout mechanism using useEffect and setTimeout: if after 10 seconds the actor is still not initialized or the profile query has not resolved, treat the state as 'no profile' and allow the user to proceed to ProfileSetup. Display a user-friendly message in the loading state such as 'Loading your profile…'. Ensure the timeout is cleared when the component unmounts or when the query resolves successfully."
+          "description": "Review the ProfileSetup page and ensure it remains fully functional with no breaking changes. Verify that: (1) display name input works, (2) emoji/color/background selection from presets in constants/profileOptions.ts is wired correctly, (3) ProfilePreview component shows a live preview, (4) form submission calls the useRegisterProfile mutation with the profile data, (5) successful registration navigates to Dashboard via router or window.location. Add or verify CSS to ensure emoji buttons are centered (justify-center items-center) on mobile screens."
+        }
+      ]
+    },
+    {
+      "id": "REQ-40",
+      "summary": "Keep LogPoop page intact: multi-step flow for confirming poop log, entering wipe count, and showing success screen; submit entry to backend with timestamp",
+      "acceptanceCriteria": [
+        "User can initiate logging a poop from the Dashboard",
+        "User is prompted to enter number of wipes",
+        "On submission, logPoop is called on the backend with wipe count",
+        "A success confirmation screen is shown after logging",
+        "User can navigate back to Dashboard after logging"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/LogPoop.tsx",
+          "operation": "modify",
+          "description": "Review the LogPoop page and ensure it remains fully functional with no breaking changes. Verify that: (1) the multi-step flow (confirmation, wipe count input, success screen) works correctly, (2) the useCreatePoopEntry mutation is called with the wipe count (backend handles timestamp automatically), (3) success screen is displayed after successful submission, (4) navigation back to Dashboard works correctly. No changes needed unless there are broken references or missing navigation wiring."
+        }
+      ]
+    },
+    {
+      "id": "REQ-41",
+      "summary": "Keep LoginPage intact with Internet Identity login button and playful branding; no functional changes needed",
+      "acceptanceCriteria": [
+        "Login page displays with Internet Identity login button",
+        "Clicking login triggers the Internet Identity authentication flow",
+        "After successful login, user is routed through the profile detection logic in App.tsx"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/LoginPage.tsx",
+          "operation": "modify",
+          "description": "Review the LoginPage and confirm it is fully functional with no changes required. Ensure the Internet Identity login button uses the useInternetIdentity hook and triggers the login flow correctly. After successful authentication, App.tsx routing logic should take over. No modifications needed unless there are broken imports or missing dependencies."
         }
       ]
     }

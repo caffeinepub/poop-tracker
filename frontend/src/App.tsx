@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { createRouter, createRoute, createRootRoute, RouterProvider, Outlet } from '@tanstack/react-router';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { useMyProfile } from './hooks/useQueries';
@@ -9,44 +8,15 @@ import ProfileSetup from './pages/ProfileSetup';
 import Dashboard from './pages/Dashboard';
 import LogPoop from './pages/LogPoop';
 
-const PROFILE_LOAD_TIMEOUT_MS = 10_000;
-
 function RootComponent() {
   const { identity, isInitializing } = useInternetIdentity();
   const { actor, isFetching: isActorFetching } = useActor();
-  const { data: profile, isLoading: isProfileLoading, isFetched: isProfileFetched } = useMyProfile();
+  const { data: profile, isLoading: isProfileLoading } = useMyProfile();
 
-  // Safety timeout: if after 10s we still haven't resolved, treat as no profile
-  const [timedOut, setTimedOut] = useState(false);
+  // Phase 1: still initializing identity or actor
+  const isLoading = isInitializing || (!!identity && (isActorFetching || !actor)) || (!!actor && !!identity && isProfileLoading);
 
-  const isActorReady = !!actor && !isActorFetching && !!identity;
-
-  // Phase 1: still initializing identity
-  const waitingForIdentity = isInitializing;
-
-  // Phase 2: identity ready, actor not yet ready
-  const waitingForActor = !isInitializing && !!identity && !isActorReady;
-
-  // Phase 3: actor ready, profile query in flight
-  const waitingForProfile = isActorReady && isProfileLoading && !isProfileFetched;
-
-  const isLoading = waitingForIdentity || waitingForActor || waitingForProfile;
-
-  useEffect(() => {
-    if (!isLoading) {
-      setTimedOut(false);
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setTimedOut(true);
-    }, PROFILE_LOAD_TIMEOUT_MS);
-
-    return () => clearTimeout(timer);
-  }, [isLoading]);
-
-  // Show loading screen while we're waiting (unless timed out)
-  if (isLoading && !timedOut) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
@@ -62,15 +32,12 @@ function RootComponent() {
     return <LoginPage />;
   }
 
-  // Actor ready + query settled (or timed out): decide which screen to show
-  // Only show ProfileSetup if the backend explicitly returned null (no profile)
-  // OR if we timed out (safety fallback)
-  const hasProfile = isProfileFetched && profile !== null && profile !== undefined;
-
-  if (!hasProfile) {
+  // Logged in but no profile
+  if (!profile) {
     return <ProfileSetup />;
   }
 
+  // Logged in with profile — show the app
   return (
     <Layout>
       <Outlet />

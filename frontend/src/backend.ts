@@ -93,37 +93,74 @@ export interface Entry {
     numberOfWipes: bigint;
     timestamp: Time;
 }
+export type Time = bigint;
 export interface Profile {
     background: string;
     displayName: string;
     color: string;
     emoji: string;
 }
-export type Time = bigint;
-export interface DailyStats {
-    totalToiletPaperRolls: bigint;
-    avgWipesPerPoop: number;
-    totalPoops: bigint;
-    totalWipes: bigint;
-}
 export interface UserStats {
     principal: Principal;
     entries: Array<Entry>;
     totalToiletPaperRolls: bigint;
-    avgWipesPerPoop: bigint;
+    avgWipesPerPoop: number;
     totalPoops: bigint;
     totalWipes: bigint;
     profile: Profile;
 }
-export interface backendInterface {
-    createPoopEntry(numberOfWipes: bigint): Promise<void>;
-    getDailyStats(): Promise<DailyStats>;
-    getMyProfile(): Promise<Profile>;
-    getRankedUserStats(): Promise<Array<UserStats>>;
-    register(profile: Profile): Promise<void>;
+export enum UserRole {
+    admin = "admin",
+    user = "user",
+    guest = "guest"
 }
+export interface backendInterface {
+    _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
+    assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    createPoopEntry(numberOfWipes: bigint): Promise<void>;
+    getCallerUserProfile(): Promise<Profile | null>;
+    getCallerUserRole(): Promise<UserRole>;
+    getMyEntries(): Promise<Array<Entry>>;
+    getRankedUserStats(): Promise<{
+        today: Array<UserStats>;
+        allTime: Array<UserStats>;
+    }>;
+    getUserProfile(user: Principal): Promise<Profile | null>;
+    isCallerAdmin(): Promise<boolean>;
+    register(profile: Profile): Promise<void>;
+    saveCallerUserProfile(profile: Profile): Promise<void>;
+}
+import type { Profile as _Profile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
+    async _initializeAccessControlWithSecret(arg0: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor._initializeAccessControlWithSecret(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor._initializeAccessControlWithSecret(arg0);
+            return result;
+        }
+    }
+    async assignCallerUserRole(arg0: Principal, arg1: UserRole): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.assignCallerUserRole(arg0, to_candid_UserRole_n1(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.assignCallerUserRole(arg0, to_candid_UserRole_n1(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
     async createPoopEntry(arg0: bigint): Promise<void> {
         if (this.processError) {
             try {
@@ -138,35 +175,52 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getDailyStats(): Promise<DailyStats> {
+    async getCallerUserProfile(): Promise<Profile | null> {
         if (this.processError) {
             try {
-                const result = await this.actor.getDailyStats();
+                const result = await this.actor.getCallerUserProfile();
+                return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCallerUserProfile();
+            return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getCallerUserRole(): Promise<UserRole> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCallerUserRole();
+                return from_candid_UserRole_n4(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCallerUserRole();
+            return from_candid_UserRole_n4(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getMyEntries(): Promise<Array<Entry>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getMyEntries();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getDailyStats();
+            const result = await this.actor.getMyEntries();
             return result;
         }
     }
-    async getMyProfile(): Promise<Profile> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getMyProfile();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getMyProfile();
-            return result;
-        }
-    }
-    async getRankedUserStats(): Promise<Array<UserStats>> {
+    async getRankedUserStats(): Promise<{
+        today: Array<UserStats>;
+        allTime: Array<UserStats>;
+    }> {
         if (this.processError) {
             try {
                 const result = await this.actor.getRankedUserStats();
@@ -177,6 +231,34 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getRankedUserStats();
+            return result;
+        }
+    }
+    async getUserProfile(arg0: Principal): Promise<Profile | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getUserProfile(arg0);
+                return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getUserProfile(arg0);
+            return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async isCallerAdmin(): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.isCallerAdmin();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.isCallerAdmin();
             return result;
         }
     }
@@ -194,6 +276,53 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async saveCallerUserProfile(arg0: Profile): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.saveCallerUserProfile(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.saveCallerUserProfile(arg0);
+            return result;
+        }
+    }
+}
+function from_candid_UserRole_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
+    return from_candid_variant_n5(_uploadFile, _downloadFile, value);
+}
+function from_candid_opt_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Profile]): Profile | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_variant_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    admin: null;
+} | {
+    user: null;
+} | {
+    guest: null;
+}): UserRole {
+    return "admin" in value ? UserRole.admin : "user" in value ? UserRole.user : "guest" in value ? UserRole.guest : value;
+}
+function to_candid_UserRole_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): _UserRole {
+    return to_candid_variant_n2(_uploadFile, _downloadFile, value);
+}
+function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): {
+    admin: null;
+} | {
+    user: null;
+} | {
+    guest: null;
+} {
+    return value == UserRole.admin ? {
+        admin: null
+    } : value == UserRole.user ? {
+        user: null
+    } : value == UserRole.guest ? {
+        guest: null
+    } : value;
 }
 export interface CreateActorOptions {
     agent?: Agent;

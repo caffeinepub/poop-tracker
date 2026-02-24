@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 23,
-  "summary": "Poop tracker app - A playful group tracker where friends log poops and wipes with leaderboards and daily progress views",
+  "projectStateVersion": 25,
+  "summary": "Poop tracker app - Simplified rebuild keeping Internet Identity login, user profiles (name + emoji), and a single unified dashboard with Lifetime/Daily toggle showing poop/wipe stats. Stripping back to core features only.",
   "architectural_notes": [
     "Use Internet Identity for simple passkey-based authentication",
     "Store poop entries with automatic timestamp (date and time)",
@@ -9,14 +9,11 @@
     "Profile linked to each logged entry to ensure proper data attribution",
     "Daily leaderboard stats reset at midnight in each user's local timezone",
     "All entries stored with dates and timestamps to enable future historical features",
-    "The Efficient Wiper badge is standalone and awarded to the user with the lowest average wipes per poop; no minimum poop requirement; MVP title remains tied only to King Pooper + King Wiper"
+    "App is being rebuilt from scratch — simplified codebase with no over-engineered profile detection or tri-state routing",
+    "Single unified dashboard page with Lifetime/Daily toggle replacing separate leaderboard and daily view components"
   ],
-  "known_issues": [
-    "Profile creation screen blocks access to main page after login even when an existing profile is present — profile lookup fails to retrieve existing profile and falls through to creation flow",
-    "Version 9 profile loading fix caused app to get stuck on loading screen indefinitely; rolled back to pre-Efficient Wiper version",
-    "Version 10 still redirects to profile creation screen on startup even when user already has a profile — app gets stuck on profile creation; profile lookup resolves to 'no profile' before backend call completes"
-  ],
-  "isFixRequest": true,
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
       "id": "feature-implement-internet-identity-authentication-so-users-can-securely-log-in-and-have-their-poop-and-wipe-entries-tracked-to-their-individual-profiles",
@@ -241,75 +238,63 @@
         "REQ-34"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-rewrite-app-tsx-from-scratch-with-simple-reliable-two-phase-routing-1-while-the-actor-is-null-or-the-profile-query-is-still-loading-show-a-full-screen-centered-loading-spinner-with-the-text-loading-your-profile-2-once-both-the-actor-is-initialized-and-the-profile-query-has-settled-route-to-loginpage-if-not-authenticated-profilesetup-if-authenticated-but-no-profile-exists-or-dashboard-if-authenticated-and-a-profile-exists-do-not-use-tri-state-enums-do-not-render-profilesetup-or-dashboard-until-the-profile-query-has-fully-resolved",
+      "title": "Rewrite App.tsx from scratch with simple, reliable two-phase routing: (1) while the actor is null OR the profile query is still loading, show a full-screen centered loading spinner with the text 'Loading your profile…'; (2) once both the actor is initialized AND the profile query has settled, route to LoginPage if not authenticated, ProfileSetup if authenticated but no profile exists, or Dashboard if authenticated and a profile exists. Do not use tri-state enums. Do not render ProfileSetup or Dashboard until the profile query has fully resolved.",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-rewrite-the-useprofile-hook-in-usequeries-ts-using-usequery-with-an-enabled-guard-the-backend-getprofile-call-must-only-fire-when-the-actor-is-confirmed-non-null-the-hook-must-return-isloading-true-while-the-actor-is-undefined-null-or-while-the-query-is-in-flight-and-only-return-a-settled-result-profile-or-null-after-the-async-call-has-fully-completed",
+      "title": "Rewrite the useProfile hook in useQueries.ts using useQuery with an enabled guard: the backend getProfile call must only fire when the actor is confirmed non-null. The hook must return isLoading: true while the actor is undefined/null or while the query is in flight, and only return a settled result (profile or null) after the async call has fully completed.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-rewrite-the-dashboard-page-frontend-src-pages-dashboard-tsx-as-a-single-unified-page-with-1-a-lifetime-daily-toggle-at-the-top-2-a-personal-stats-card-showing-the-logged-in-user-s-total-poops-and-total-wipes-lifetime-or-today-depending-on-toggle-3-a-log-a-poop-button-that-navigates-to-the-log-flow-4-a-leaderboard-standings-section-showing-all-users-ranked-by-total-poops-with-columns-for-display-name-emoji-total-poops-total-wipes-filtered-by-the-selected-toggle-mode-remove-all-efficient-wiper-references-remove-separate-leaderboard-and-alltimestandings-components-if-they-cause-complexity-inline-the-logic-cleanly",
+      "title": "Rewrite the Dashboard page (frontend/src/pages/Dashboard.tsx) as a single unified page with: (1) a Lifetime/Daily toggle at the top, (2) a personal stats card showing the logged-in user's total poops and total wipes (lifetime or today depending on toggle), (3) a 'Log a Poop' button that navigates to the log flow, (4) a leaderboard/standings section showing all users ranked by total poops with columns for display name/emoji, total poops, total wipes — filtered by the selected toggle mode. Remove all Efficient Wiper references. Remove separate Leaderboard and AllTimeStandings components if they cause complexity; inline the logic cleanly.",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-keep-the-profilesetup-page-frontend-src-pages-profilesetup-tsx-intact-and-functional-allow-users-to-set-a-display-name-choose-from-preset-emojis-pick-a-color-and-background-preview-their-profile-and-submit-the-profile-to-the-backend-ensure-emojis-are-properly-centered-in-their-selection-boxes-on-mobile",
+      "title": "Keep the ProfileSetup page (frontend/src/pages/ProfileSetup.tsx) intact and functional: allow users to set a display name, choose from preset emojis, pick a color and background, preview their profile, and submit the profile to the backend. Ensure emojis are properly centered in their selection boxes on mobile.",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-keep-the-logpoop-page-frontend-src-pages-logpoop-tsx-intact-a-simple-multi-step-flow-where-the-user-confirms-they-want-to-log-a-poop-enters-the-number-of-wipes-and-sees-a-success-screen-the-entry-is-submitted-to-the-backend-with-a-timestamp",
+      "title": "Keep the LogPoop page (frontend/src/pages/LogPoop.tsx) intact: a simple multi-step flow where the user confirms they want to log a poop, enters the number of wipes, and sees a success screen. The entry is submitted to the backend with a timestamp.",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "User authentication with Internet Identity for profile tracking",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "User profiles with customizable name, emoji/icon, colors, and backgrounds (no custom images)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Simple data entry flow: log poop → enter wipes → auto-timestamp → done",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Daily view showing everyone's progress with toggle between group and individual views",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-11",
-      "summary": "Add backend query function to aggregate and return all users' lifetime statistics including total poop count, total wipe count, and profile information needed for leaderboard rankings and standings table",
+      "summary": "Rewrite the Motoko backend (backend/main.mo) from scratch with a clean, minimal implementation supporting: (1) user profile registration and retrieval keyed by principal (displayName, emoji, color, background), (2) logging a poop entry with wipe count and auto-timestamp, (3) retrieving all entries for the authenticated principal, (4) retrieving ranked stats for all users (total poops, total wipes) for both lifetime and daily (today) scopes. Remove any dead or unused functions.",
       "reqIds": [
-        "REQ-13"
+        "REQ-35"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-12",
-      "summary": "Add toggle switch to leaderboard page to switch between lifetime and daily views, with daily stats calculated from entries timestamped on the current day and resetting at midnight in each user's local timezone",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-14",
-      "summary": "Add backend query function that calculates and returns daily statistics for all users based on entries from the current day, including total poops, total wipes, toilet paper rolls consumed, and average wipes per poop",
+      "id": "AR-7",
+      "summary": "Keep the LoginPage (frontend/src/pages/LoginPage.tsx) intact with the Internet Identity login button and playful branding. No functional changes needed.",
       "reqIds": [
-        "REQ-16"
+        "REQ-41"
       ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-17",
-      "summary": "Ensure all poop entry timestamps are stored with full date and time information to enable daily statistics calculation and future historical feature development",
-      "reqIds": [
-        "REQ-19"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-18",
-      "summary": "Implement daily statistics reset at midnight in each user's local timezone so that daily leaderboard competitions start fresh each day",
-      "reqIds": [
-        "REQ-20"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-19",
-      "summary": "Add 'The Efficient Wiper' title to both lifetime and daily leaderboard views, awarded to the user with the lowest average wipes per poop, displayed as its own category in the top badges section alongside King Pooper and King Wiper",
-      "reqIds": [],
       "status": "pending"
     }
   ],

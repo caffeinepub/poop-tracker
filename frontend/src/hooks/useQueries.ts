@@ -12,25 +12,12 @@ export function useMyProfile() {
   return useQuery<Profile | null>({
     queryKey: ['myProfile'],
     queryFn: async () => {
-      if (!actor) {
-        // This should never be reached due to `enabled`, but guard anyway
-        throw new Error('Actor not ready');
-      }
-      try {
-        const profile = await actor.getMyProfile();
-        return profile;
-      } catch {
-        // Backend throws when user is not registered — treat as no profile
-        return null;
-      }
+      if (!actor) throw new Error('Actor not ready');
+      const profile = await actor.getCallerUserProfile();
+      return profile;
     },
-    // CRITICAL: only run the query when the actor is fully ready.
-    // While enabled=false, isLoading stays false but data stays undefined.
-    // We handle the "actor not ready" loading state in App.tsx by checking isActorReady.
     enabled: isActorReady,
-    // Never use stale data for profile detection — always fetch fresh on mount
     staleTime: 0,
-    // Retry once in case of transient network issues, but not more
     retry: 1,
     retryDelay: 1000,
   });
@@ -69,10 +56,10 @@ export function useCreatePoopEntry() {
 export function useRankedUserStats() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<UserStats[]>({
+  return useQuery<{ allTime: UserStats[]; today: UserStats[] }>({
     queryKey: ['rankedUserStats'],
     queryFn: async () => {
-      if (!actor) return [];
+      if (!actor) return { allTime: [], today: [] };
       return await actor.getRankedUserStats();
     },
     enabled: !!actor && !isFetching,

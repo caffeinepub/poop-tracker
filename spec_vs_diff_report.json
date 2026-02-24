@@ -1,15 +1,140 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T19:11:55.476Z",
-  "summary": "The diff modifies App.tsx and useQueries.ts to implement profile detection fixes. REQ-32 and REQ-33 are largely implemented. REQ-34 is partially implemented — the timeout mechanism and 'Loading your profile…' message exist, but there is a subtle gap: the timeout fires during actor/identity initialization phases too (not just profile query), which is acceptable per spec. The main concern is whether the 10-second timeout correctly falls through to ProfileSetup. Reviewing the logic: when timedOut=true, the loading spinner is skipped, and the code proceeds to check hasProfile = isProfileFetched && profile !== null. If the actor never became ready, isProfileFetched will be false and profile will be undefined, so hasProfile=false and ProfileSetup is rendered — this satisfies REQ-34. REQ-33's AC about 'navigates directly to Dashboard' uses an Outlet pattern rather than explicit navigation, which may not route to '/' automatically, but the Dashboard is the index route so this is likely fine. Overall the implementation appears complete.",
-  "missing_requirements": [],
-  "hallucinated_features": [],
+  "generatedAt": "2026-02-24T19:47:28.073Z",
+  "summary": "The diff implements most of the core requirements (REQ-36 through REQ-41) reasonably well. However, REQ-35 (backend rewrite) shows significant deviation: the backend uses different function names than specified (getCallerUserProfile instead of getProfile, register instead of registerProfile, createPoopEntry instead of logPoop, getRankedUserStats instead of getRankedStats/getDailyStats), includes extra authorization/access-control infrastructure not requested, and imports a migration module. The frontend hooks are adapted to match these non-spec function names. Additionally, several hallucinated features appear in the diff.",
+  "missing_requirements": [
+    {
+      "id": "REQ-35",
+      "requirement": "Backend function named 'registerProfile' that stores and retrieves a profile by caller principal",
+      "reason": "The backend uses 'register' instead of 'registerProfile' as specified in the AC",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-35",
+      "requirement": "Backend function named 'getProfile' that returns the caller's profile or null",
+      "reason": "The backend uses 'getCallerUserProfile' instead of 'getProfile' as specified in the AC",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-35",
+      "requirement": "Backend function named 'logPoop' that records a poop entry with wipe count and nanosecond timestamp",
+      "reason": "The backend uses 'createPoopEntry' instead of 'logPoop' as specified in the AC",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-35",
+      "requirement": "Backend function named 'getRankedStats' returning total poops and total wipes per user for all-time",
+      "reason": "The backend uses 'getRankedUserStats' returning combined allTime/today object instead of separate 'getRankedStats' and 'getDailyStats' functions as specified",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/hooks/useQueries.ts"
+      ]
+    },
+    {
+      "id": "REQ-35",
+      "requirement": "Backend function named 'getDailyStats' returning today's poops and total wipes per user filtered to the current UTC day",
+      "reason": "No separate 'getDailyStats' function exists; daily stats are bundled into 'getRankedUserStats' response",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-35",
+      "requirement": "Clean, minimal backend with no dead or unused functions",
+      "reason": "The backend includes MixinAuthorization, AccessControl, migration module, getUserProfile, saveCallerUserProfile, and other infrastructure not requested, violating the clean minimal constraint",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Authorization/access control system (MixinAuthorization, AccessControl) added to the backend",
+      "reason": "The build request requires a clean, minimal backend. No authorization mixin or access control layer was requested.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "Migration module (backend/migration.mo) added to the backend",
+      "reason": "No migration functionality was requested. The spec says to rewrite from scratch.",
+      "evidence": [
+        "backend/migration.mo"
+      ]
+    },
+    {
+      "description": "frontend/src/utils/urlParams.ts utility file with URL parameter and session storage management including caffeineAdminToken support",
+      "reason": "No URL parameter utility or admin token functionality was requested in any requirement.",
+      "evidence": [
+        "frontend/src/utils/urlParams.ts"
+      ]
+    },
+    {
+      "description": "Admin token initialization via actor._initializeAccessControlWithSecret in useActor.ts",
+      "reason": "No admin token or access control initialization was requested. Additionally the constraint explicitly states not to modify useActor.ts.",
+      "evidence": [
+        "frontend/src/hooks/useActor.ts"
+      ]
+    },
+    {
+      "description": "useActor.ts was modified despite being in the list of files that must not be modified",
+      "reason": "The constraint explicitly states Do not modify files in frontend/src/hooks/useActor.ts, but the diff shows this file was modified.",
+      "evidence": [
+        "frontend/src/hooks/useActor.ts"
+      ]
+    },
+    {
+      "description": "AllTimeStandings.tsx and Leaderboard.tsx components retained as separate files",
+      "reason": "REQ-38 explicitly says to remove separate Leaderboard and AllTimeStandings components and inline the logic cleanly in Dashboard.tsx.",
+      "evidence": [
+        "frontend/src/components/AllTimeStandings.tsx",
+        "frontend/src/components/Leaderboard.tsx"
+      ]
+    },
+    {
+      "description": "UserStats type includes totalToiletPaperRolls and avgWipesPerPoop fields",
+      "reason": "The spec only requires totalPoops and totalWipes per user stats. Toilet paper rolls and average wipes per poop were not requested.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/pages/Dashboard.tsx"
+      ]
+    },
+    {
+      "description": "getUserProfile function allowing viewing another user's profile by principal",
+      "reason": "The spec only requires getProfile for the caller's own profile. Cross-user profile viewing was not requested.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "saveCallerUserProfile function as a separate update function in addition to register",
+      "reason": "The spec only requires registerProfile for profile creation. A separate save/update function was not requested.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    }
+  ],
   "confidence": 0.82,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
     "frontend/src/App.tsx",
+    "frontend/src/components/AllTimeStandings.tsx",
+    "frontend/src/components/Leaderboard.tsx",
+    "frontend/src/hooks/useActor.ts",
     "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/pages/LogPoop.tsx",
+    "frontend/src/pages/ProfileSetup.tsx",
+    "frontend/src/utils/urlParams.ts",
     "project_state.json"
   ]
 }

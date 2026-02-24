@@ -1,12 +1,15 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the startup profile detection so that existing users are correctly routed to the Dashboard instead of being stuck on the profile creation screen.
+**Goal:** Rebuild the Poop Tracker app from scratch with only the core features: login, profile setup, poop/wipe logging, and a unified dashboard with a Lifetime/Daily toggle.
 
 **Planned changes:**
-- Rewrite the `useProfile` hook in `useQueries.ts` to only fire the backend `getProfile` call after the actor is confirmed non-null, staying in `isLoading: true` until the call fully resolves
-- Rewrite the routing logic in `App.tsx` to show a full-screen loading spinner until both the actor is ready and the profile query has settled, then route to Dashboard if a profile exists or ProfileSetup if it does not
-- Add a 10-second safety timeout in `App.tsx` so the app never stays stuck on the loading screen indefinitely, falling through to ProfileSetup if the timeout is reached
-- Display a "Loading your profile…" message during the loading state
+- Rewrite the Motoko backend from scratch with clean, minimal functions: `registerProfile`, `getProfile`, `logPoop`, `getRankedStats`, and `getDailyStats`; remove all unused functions
+- Rewrite `App.tsx` with simple two-phase routing: show a loading spinner until both the actor is initialized and the profile query resolves, then route to LoginPage, ProfileSetup, or Dashboard accordingly
+- Rewrite the `useProfile` hook so the backend call only fires when the actor is non-null and `isLoading` remains true until the call fully resolves
+- Rewrite `Dashboard.tsx` as a single unified page with a Lifetime/Daily toggle, a personal stats card, a leaderboard/standings table (ranked by poops and wipes), King Pooper and King Wiper badges (MVP if same user holds both), and a Log a Poop button; remove all Efficient Wiper references
+- Keep `ProfileSetup.tsx` intact with display name, emoji, color, and background selection, live preview, and mobile emoji centering fix
+- Keep `LogPoop.tsx` intact as a multi-step flow for logging poops and wipe count with a success screen
+- Keep `LoginPage.tsx` intact with Internet Identity login and playful branding
 
-**User-visible outcome:** Users who already have a profile are taken directly to the Dashboard on startup without ever seeing the profile creation screen. New users are still correctly routed to ProfileSetup, and no one gets stuck on a loading screen indefinitely.
+**User-visible outcome:** Users can log in with Internet Identity, set up a profile, log poops with wipe counts, and view a single dashboard that toggles between lifetime and daily stats with a ranked leaderboard and achievement badges.
